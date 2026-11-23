@@ -502,6 +502,7 @@ test-serial: $(TARGET)
 	python3 tests/test_du_sizes.py
 	python3 tests/test_archive_vfs.py
 	python3 tests/test_arc_readonly.py
+	python3 tests/test_arc_fuzz.py
 	python3 tests/test_git_status.py
 	python3 tests/test_bulk_rename.py
 	python3 tests/test_viewer_pro.py
