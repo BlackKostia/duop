@@ -11,9 +11,12 @@ typedef struct ArcParseInfo {
     uint32_t skipped;               /* members that could not be listed (name too long, empty, NUL in the name) */
     uint32_t unsupported;           /* members using a feature that is not implemented (sparse files, multi-disk) */
     uint32_t encrypted;             /* zip members with the encryption flag */
+    uint32_t overlap;               /* zip members whose data overlaps an earlier member (a zip bomb): flagged ARC_F_UNSAFE */
     uint64_t end;                   /* tar: offset of the end-of-archive block (or the data length) */
 } ArcParseInfo;
 
 /* 0, -EINVAL when data is not this kind of archive (the first header / the end record is invalid), -ENOMEM, -EFBIG (too many members) */
 int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info);
+/* zip: the end record is searched from the back (an exact comment length wins), ZIP64 and a prefix (self-extractor stub, offsets relative
+ * to the zip) are handled, members whose local header is missing are dropped (damaged), a multi-disk archive is -EOPNOTSUPP */
 int arc_zip_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info);

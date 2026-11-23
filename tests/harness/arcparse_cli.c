@@ -1,7 +1,7 @@
 /* Freestanding harness for the archive parsers (src/fs/arc_tar.c, arc_zip.c). Script on stdin:
  *   T <path>   parse a tar with arc_tar_parse          Z <path>   parse a zip with arc_zip_parse
  * The file is copied to the END of a mapping with a PROT_NONE page on both sides, so a read before or behind it faults; the parser runs
- * under the fault guard. Output: "<kind> rc=<r> n=<unique> dmg=<damaged> skip=<skipped> uns=<unsupported> enc=<encrypted>" or "<kind> fault",
+ * under the fault guard. Output: "<kind> rc=<r> n=<unique> dmg=<damaged> skip=<skipped> uns=<unsupported> enc=<encrypted> ov=<overlap>" or "<kind> fault",
  * then one line per distinct name in order: "<hexname> <flags> <size> <comp_size> <off> <mtime> <mode> <method> <crc> <hexlink|->". */
 #include "script_cli.h"
 #include "duop_arcidx.h"
@@ -75,7 +75,7 @@ static void parse_file(char kind, const char *path)
     (void)arc_idx_finish(&x);
     char head[2] = {kind, 0};
     sc_put(head); sc_put(" rc="); sc_num(rc); sc_put(" n="); sc_num(x.unique); sc_put(" dmg="); sc_num(info.damaged);
-    sc_put(" skip="); sc_num(info.skipped); sc_put(" uns="); sc_num(info.unsupported); sc_put(" enc="); sc_num(info.encrypted); sc_put("\n");
+    sc_put(" skip="); sc_num(info.skipped); sc_put(" uns="); sc_num(info.unsupported); sc_put(" enc="); sc_num(info.encrypted); sc_put(" ov="); sc_num(info.overlap); sc_put("\n");
     dump(&x);
     arc_idx_free(&x);
     (void)os_munmap_raw((void *)m, total + 8192);
