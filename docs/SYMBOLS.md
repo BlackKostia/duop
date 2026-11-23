@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 632
+- **Exported `.global` Symbols**: 633
 
 ## Structs (`include/*.inc`)
 
@@ -534,6 +534,8 @@
 - **`src/fs/inflate.c`**
   - `inflate_raw` — `int64_t inflate_raw(const void *src, uint64_t src_len, void *dst, uint64_t dst_cap)`
   - `inflate_zlib` — `int64_t inflate_zlib(const void *src, uint64_t src_len, void *dst, uint64_t dst_cap)`
+- **`src/fs/inflate_stream.c`**
+  - `inflate_stream` — `intptr_t inflate_stream(const void *src, uint64_t src_len, uint32_t flags, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/nav_persist.c`**
   - `nav_bookmarks_remove` — `void nav_bookmarks_remove(int idx)`
 - **`src/fs/nav_state.c`**

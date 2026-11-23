@@ -109,6 +109,8 @@
 .equ ENOTDIR,                 20
 .equ EISDIR,                  21
 .equ EINVAL,                  22
+.equ EFBIG,                   27
+.equ EBADMSG,                 74
 .equ ENOSYS,                  38
 .equ ENOTEMPTY,               39
 .equ EOPNOTSUPP,              95

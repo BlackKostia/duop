@@ -20,9 +20,11 @@
 #define ENOTDIR 20
 #define EISDIR 21
 #define EINVAL 22
+#define EFBIG 27
 #define ENAMETOOLONG 36
 #define ENOSYS 38
 #define ENOTEMPTY 39
+#define EBADMSG 74
 #define EOPNOTSUPP 95
 #define ECANCELED 125
 
