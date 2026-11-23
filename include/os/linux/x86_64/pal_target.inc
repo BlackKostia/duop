@@ -47,6 +47,8 @@
 .equ OS_SYS_readlinkat,     267
 .equ OS_SYS_fchmodat,       268
 .equ OS_SYS_fchownat,       260
+.equ OS_SYS_utimensat,      280
+.equ OS_SYS_fstatfs,        138
 .equ OS_SYS_ppoll,          271
 .equ OS_SYS_pipe2,          293
 .equ OS_SYS_inotify_init1,  294

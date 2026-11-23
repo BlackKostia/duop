@@ -15,6 +15,7 @@ static inline void os_try_end(TryFrame *frame) { g_try_frame = frame->prev; }   
 DUOP_NODISCARD intptr_t    sys_write_all(int fd, const void *buf, size_t len);       /* total written or -errno; retries EINTR/EAGAIN */
 DUOP_NODISCARD intptr_t    sys_read_retry(int fd, void *buf, size_t len);            /* read(2) retried on EINTR */
 int64_t     sys_clock_ms(void);
+DUOP_NODISCARD intptr_t sys_fs_avail(int fd, uint64_t *avail);   /* bytes available to an unprivileged writer on the file system of fd: 0 or -errno */
 void        sys_get_winsize(int *cols, int *rows);
 int         term_enter_raw(void);
 void        term_exit_raw(void);

@@ -42,7 +42,7 @@ def hand_written() -> set[str]:
 
 def asm_struct_names() -> set[str]:
     names = set()
-    for inc in ("classes.inc", "dialogs_ext.inc", "types.inc", "pal.inc"):
+    for inc in ("classes.inc", "dialogs_ext.inc", "types.inc", "types_core.inc", "pal.inc"):
         lines = (ROOT / "include" / inc).read_text(encoding="utf-8").splitlines()
         names |= {m.group(1) for ln in lines if (m := re.match(r"CLASS_BEGIN\s+(\w+)", ln))}
         names |= {m.group(1) for ln in lines if (m := re.match(r"(\w+)\._size:", ln))}

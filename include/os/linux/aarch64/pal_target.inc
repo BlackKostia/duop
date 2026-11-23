@@ -23,6 +23,8 @@
 .equ OS_SYS_chdir,            49
 .equ OS_SYS_fchmodat,         53
 .equ OS_SYS_fchownat,         54
+.equ OS_SYS_utimensat,        88
+.equ OS_SYS_fstatfs,          44
 .equ OS_SYS_openat,           56
 .equ OS_SYS_close,            57
 .equ OS_SYS_pipe2,            59

@@ -66,6 +66,8 @@ DUOP_NODISCARD intptr_t os_symlinkat(const char *target, int newdirfd, const cha
 DUOP_NODISCARD intptr_t os_readlinkat(int dirfd, const char *path, char *buf, size_t n);
 DUOP_NODISCARD intptr_t os_linkat(int olddir, const char *old, int newdir, const char *new_, int flags);
 DUOP_NODISCARD intptr_t os_fchmodat(int dirfd, const char *path, unsigned mode);
+DUOP_NODISCARD intptr_t os_utimensat(int dirfd, const char *path, const int64_t ts[4], int flags);   /* ts = {atime s, ns, mtime s, ns}, NULL = now; path NULL: the file of dirfd (futimens) */
+DUOP_NODISCARD intptr_t os_fstatfs(int fd, void *statfs_buf);   /* struct statfs: 120 bytes, f_bsize at 8, f_bavail at 32 on x86_64 and aarch64 */
 DUOP_NODISCARD intptr_t os_fchownat(int dirfd, const char *path, unsigned uid, unsigned gid, int flags);
 intptr_t os_getcwd(char *buf, size_t n);
 intptr_t os_chdir(const char *path);

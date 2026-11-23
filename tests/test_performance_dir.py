@@ -27,7 +27,7 @@ def wait_for(sess: PtySession, predicate, timeout: float = 3.0, desc: str = "con
 
 
 def test_compact_structures_and_pal_contracts() -> None:
-    types_inc = open(os.path.join(REPO_ROOT, "include/types.inc"), encoding="utf-8").read()
+    types_inc = "".join(open(os.path.join(REPO_ROOT, f), encoding="utf-8").read() for f in ("include/types.inc", "include/types_core.inc"))
     classes_inc = open(os.path.join(REPO_ROOT, "include/classes.inc"), encoding="utf-8").read()
     config_inc = open(os.path.join(REPO_ROOT, "include/config.inc"), encoding="utf-8").read()
     pal_inc = open(os.path.join(REPO_ROOT, "include/pal.inc"), encoding="utf-8").read()

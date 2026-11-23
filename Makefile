@@ -293,7 +293,7 @@ $(BUILD)/i18n_slots.h: tools/gen_i18n.py include/types.inc
 	python3 tools/gen_i18n.py --out-slots $@
 
 # C structs of the assembler's classes and .struct layouts (tools/gen_abi.py; hand-written duop_*.h structs are skipped)
-$(BUILD)/duop_classes.h: tools/gen_abi.py include/classes.inc include/dialogs_ext.inc include/types.inc include/pal.inc include/config.inc include/oop.inc $(wildcard include/duop_*.h)
+$(BUILD)/duop_classes.h: tools/gen_abi.py include/classes.inc include/dialogs_ext.inc include/types.inc include/types_core.inc include/pal.inc include/config.inc include/oop.inc $(wildcard include/duop_*.h)
 	@mkdir -p $(BUILD)
 	python3 tools/gen_abi.py --out $@
 
@@ -378,6 +378,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_arc_vfs.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py
+	python3 tests/test_c_fsmeta.py
 	python3 tests/test_c_try.py
 	python3 tests/test_c_memory.py
 	python3 tests/test_c_memcheck.py

@@ -37,6 +37,7 @@ LAYOUTS = [  # (C header, C expression, assembler symbol)
     ("duop_task.h", "offsetof(TaskShared, phase)", "TaskShared.phase"),
     ("duop_task.h", "offsetof(TaskShared, cancel)", "TaskShared.cancel"),
     ("duop_task.h", "offsetof(TaskShared, conflict_state)", "TaskShared.conflict_state"),
+    ("duop_task.h", "offsetof(TaskShared, skipped)", "TaskShared.skipped"),
     ("duop_task.h", "offsetof(TaskShared, conflict_action)", "TaskShared.conflict_action"),
     ("duop_task.h", "offsetof(TaskShared, conflict_all)", "TaskShared.conflict_all"),
     ("duop_task.h", "offsetof(TaskShared, conflict_src_sz)", "TaskShared.conflict_src_sz"),

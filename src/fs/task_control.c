@@ -11,6 +11,7 @@
 #define TASK_KILL_GRACE_MS 3000
 
 TaskShared *g_task_shm;            /* the page of the running worker */
+uint64_t g_task_skipped;           /* its `skipped` counter once reaped */
 int64_t g_task_pause_ms;           /* accumulated paused time */
 static int64_t g_task_pause_at;    /* start of the current pause */
 int64_t g_task_cancel_at;          /* when the cancel was requested (0: none) */
@@ -38,6 +39,7 @@ int fs_task_poll(int64_t *out_result)
     while ((r = os_wait4(g_task_pid, &status, WNOHANG, nullptr)) == -EINTR) {}
     if (r > 0 || r == -ECHILD) {
         int64_t res = __atomic_load_n(&g_task_shm->phase, __ATOMIC_ACQUIRE) == TASK_PHASE_DONE ? g_task_shm->result : -EIO;
+        g_task_skipped = g_task_shm->skipped;
         task_release();
         *out_result = res;
         return 1;

@@ -21,5 +21,7 @@ PAL_SYS os_readlinkat, OS_SYS_readlinkat
 PAL_SYS os_linkat, OS_SYS_linkat
 PAL_SYS os_fchmodat, OS_SYS_fchmodat
 PAL_SYS os_fchownat, OS_SYS_fchownat
+PAL_SYS os_utimensat, OS_SYS_utimensat
+PAL_SYS os_fstatfs, OS_SYS_fstatfs
 PAL_SYS os_getcwd, OS_SYS_getcwd
 PAL_SYS os_chdir, OS_SYS_chdir

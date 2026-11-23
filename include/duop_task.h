@@ -6,6 +6,8 @@
 #define TASK_OP_COPY 1
 #define TASK_OP_MOVE 2
 #define TASK_OP_DELETE 3
+#define TASK_OP_UNPACK 4         /* archive members (job: src_dir = archive, names = [sub, member keys...]) into dst */
+#define TASK_OP_ARCTEST 5        /* every member decoded and verified, nothing written */
 #define TASK_PHASE_SCAN 1
 #define TASK_PHASE_RUN 2
 #define TASK_PHASE_DONE 3
@@ -23,6 +25,7 @@ typedef struct TaskShared {
     uint32_t conflict_state;             /* 0 none, 1 worker waiting, 2 UI decision ready */
     uint32_t conflict_action, conflict_all;
     uint64_t conflict_src_sz, conflict_dst_sz;
+    uint64_t skipped;                    /* unpack / test: members left out or failed, the worker went on */
     char cur_name[TASK_NAME_MAX];
     char conflict_name[TASK_NAME_MAX];
 } TaskShared;
@@ -59,6 +62,7 @@ extern int g_task_wake_fd, g_task_op;
 extern int g_task_pid, g_task_paused;    /* task_control.s */
 extern int64_t g_task_pause_ms, g_task_cancel_at;
 extern TaskShared *g_task_shm;
+extern uint64_t g_task_skipped;          /* UI: TaskShared.skipped of the worker reaped last (valid after fs_task_poll returned 1) */
 
 /* worker-side progress hooks (task.c): no-ops in the UI process */
 void fs_progress_begin(const char *path);                      /* basename -> cur_name under the seqlock */

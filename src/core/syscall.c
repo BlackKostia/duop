@@ -43,6 +43,15 @@ intptr_t sys_read_retry(int fd, void *buf, size_t len)
 
 int64_t sys_clock_ms(void) { return os_clock_ms(); }
 
+intptr_t sys_fs_avail(int fd, uint64_t *avail)
+{
+    uint64_t sf[16];                                                      /* struct statfs (120 bytes) of the 64-bit Linux targets */
+    intptr_t r = os_fstatfs(fd, sf);
+    if (r < 0) return r;
+    *avail = sf[1] * sf[4];                                               /* f_bsize * f_bavail */
+    return 0;
+}
+
 void sys_get_winsize(int *cols, int *rows) { os_get_winsize(cols, rows); }
 
 int term_enter_raw(void)
