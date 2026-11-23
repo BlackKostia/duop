@@ -102,7 +102,7 @@ flowchart LR
 - Криптографічна перевірка реєстру пакетів `registry.tsv.sig` (freestanding `Ed25519` у `.rodata`).
 - Налаштовувані профілі гарячих клавіш у `duoprc` (пресети `default`, `mc`, `vim`/`yazi`).
 - Розширення мовних пакетів `lang/*.lang` силами спільноти (DE, PL, ES, FR).
-- Новий PAL-бекенд `src/os/freebsd/x86_64/` для нативної роботи на FreeBSD.
+- Новий PAL-бекенд `src/os/windows/x86_64/` для збірки **`duop.exe` під Windows** через тонкий POSIX-шар MSYS2/Cygwin (детальна специфікація у [WINDOWS_PORT_PLAN.md](WINDOWS_PORT_PLAN.md)) та `src/os/freebsd/x86_64/` для FreeBSD.
 
 ---
 
