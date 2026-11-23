@@ -116,10 +116,19 @@ void App_cmd_shell(App *app)
     reload_both_panes(app, nullptr);
 }
 
+/* an archive pane lists a virtual folder: its DirModel.path is the archive file, so no copy / move / delete can address its entries */
+static bool refuse_in_archive(App *app, const DirModel *m)
+{
+    if (m->virtual_mode != 2) return false;
+    App_set_status(app, i18n_get()->s[LS_arc_readonly], MSG_WARN);
+    return true;
+}
+
 static void open_transfer_dlg(App *app, uint32_t op_tag)
 {
     FilePane *pane = (FilePane *)(uintptr_t)app->active_pane;
     DirModel *m = (DirModel *)(uintptr_t)pane->model;
+    if (refuse_in_archive(app, m)) return;
     if (DirModel_count_selected(m, nullptr) == 0) {
         FileEntry *fe = FilePane_get_selected_entry(pane);
         if (!fe) return;
@@ -144,6 +153,7 @@ void App_cmd_delete(App *app)
 {
     FilePane *pane = (FilePane *)(uintptr_t)app->active_pane;
     DirModel *m = (DirModel *)(uintptr_t)pane->model;
+    if (refuse_in_archive(app, m)) return;
     size_t cnt = DirModel_count_selected(m, nullptr);
     const LangStrings *lang = i18n_get();
     if (cnt != 0) {

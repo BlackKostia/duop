@@ -193,7 +193,6 @@ DataSpec.sub:   .space 8   # "layouts": subdirectory under duop/ config + share 
 DataSpec.ext:   .space 8   # ".layout": file name suffix that is loaded
 DataSpec.load:  .space 8   # void load(const char *path, const char *name)
 DataSpec._size:
-
 # --- LangStrings (Table-driven i18n string bundle) ---
 .struct 0
 LangStrings.code:               .space 8
@@ -393,6 +392,7 @@ LangStrings.pkg_err:            .space 8
 LangStrings.pkg_tab_inst:       .space 8
 LangStrings.pkg_tab_avail:      .space 8
 LangStrings.arc_truncated:      .space 8
+LangStrings.arc_readonly:       .space 8
 LangStrings.err_cmd_long:       .space 8
 LangStrings.cfg_truncated:      .space 8
 LangStrings.err_special:        .space 8

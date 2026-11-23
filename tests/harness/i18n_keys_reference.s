@@ -277,6 +277,7 @@ i18n_keys:
     LK pkg_tab_inst, LangStrings.pkg_tab_inst
     LK pkg_tab_avail, LangStrings.pkg_tab_avail
     LK arc_truncated, LangStrings.arc_truncated
+    LK arc_readonly, LangStrings.arc_readonly
     LK err_cmd_long, LangStrings.err_cmd_long
     LK cfg_truncated, LangStrings.cfg_truncated
     LK err_special, LangStrings.err_special

@@ -267,6 +267,7 @@ pkg_err             = " Package operation failed "
 pkg_tab_inst        = " Installed "
 pkg_tab_avail       = " Available "
 arc_truncated       = Archive truncated at 4 MiB limit
+arc_readonly        = Archive is read-only: copy, move and delete are not available inside it
 err_cmd_long        = Command too long: not executed
 cfg_truncated       = Config file too large: the rest was ignored
 err_special         = Special file (pipe/socket/device) cannot be copied or moved this way

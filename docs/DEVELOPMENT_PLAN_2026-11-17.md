@@ -50,6 +50,8 @@ flowchart LR
 ## Фаза 1 (`v2.7.x`) — Надійність даних і «TeraCopy-рівень» у ядрі
 
 ### 1.1 Повноцінна робота з архівами (реалізація `ARCHIVE_TOOLS_PLAN.md` у C23)
+> **Оновлено:** актуальний, детальніший і затверджений план — [ARCHIVE_TOOLS_PLAN.md](ARCHIVE_TOOLS_PLAN.md) (фази 0–5, `Alt+F5`/`Alt+F9` замість `Alt+P`, кодеки bz2/xz/zstd). Нижче — первісний начерк.
+
 Замість обмеженого read-only буфера (`4 МіБ` / `1024` записи) переходимо на `os_mmap_file_ro` (із захистом `SIGBUS` у PAL) та потоковий RFC 1951.
 
 - **`[NEW] src/fs/inflate_stream.c`**
