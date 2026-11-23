@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 640
+- **Exported `.global` Symbols**: 641
 
 ## Structs (`include/*.inc`)
 
@@ -387,6 +387,8 @@
   - `arc_idx_finish` — `int arc_idx_finish(ArcIndex *x)`
   - `arc_idx_find` — `const ArcItem *arc_idx_find(const ArcIndex *x, const char *path)`
   - `arc_idx_list` — `int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx)`
+- **`src/fs/arc_tar.c`**
+  - `arc_tar_parse` — `int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info)`
 - **`src/fs/archive_parse.c`**
   - `arc_is_archive` — `int arc_is_archive(const char *name)`
   - `arc_parse_tar` — `void arc_parse_tar(ArcCtx *ctx)`

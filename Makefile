@@ -74,6 +74,7 @@ C_SRCS := \
 	src/fs/inflate_stream.c \
 	src/fs/gzip_dec.c \
 	src/fs/arc_index.c \
+	src/fs/arc_tar.c \
 	src/tui/theme.c \
 	src/tui/kbd_map.c \
 	src/tui/kbd_layout.c \
@@ -369,6 +370,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_inflate_stream.py
 	python3 tests/test_c_gzip_dec.py
 	python3 tests/test_c_arc_index.py
+	python3 tests/test_c_arc_tar.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py
 	python3 tests/test_c_try.py
