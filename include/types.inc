@@ -204,6 +204,16 @@ LangStrings.arc_truncated:      .space 8
 LangStrings.arc_readonly:       .space 8
 LangStrings.arc_member_unsupported: .space 8
 LangStrings.arc_member_bad:     .space 8
+LangStrings.app_title_unpack:   .space 8
+LangStrings.app_prm_unpack:     .space 8
+LangStrings.task_title_unpack:  .space 8
+LangStrings.task_title_arctest: .space 8
+LangStrings.app_ok_unpack:      .space 8
+LangStrings.app_ok_arctest:     .space 8
+LangStrings.arc_issues_pfx:     .space 8
+LangStrings.arc_issues_sfx:     .space 8
+LangStrings.arc_bomb:           .space 8
+LangStrings.arc_not_archive:    .space 8
 LangStrings.err_cmd_long:       .space 8
 LangStrings.cfg_truncated:      .space 8
 LangStrings.err_special:        .space 8

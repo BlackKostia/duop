@@ -146,6 +146,17 @@ def test_differential(exe: Path) -> str:
     return out
 
 
+def test_archive_keys(exe: Path) -> None:
+    """Alt+F9 unpacks, Alt+Shift+F9 tests an archive, a confirmed Unpack dialog (OP_UNPACK) starts the unpack with its text (C side only)."""
+    key_f9, alt, alt_shift = 0x100019, MOD_ALT, MOD_ALT | 1
+    out = H.run_impl("x86_64", exe, "c", stdin=f"K {key_f9} {alt} 0 0\nK {key_f9} {alt_shift} 0 0\nD 23 0 0 0\n".encode()).stdout.decode()
+    lines = out.splitlines()
+    assert lines[0] == "call App_cmd_unpack 1" and lines[1].startswith("EK rc=1"), lines[:2]
+    assert lines[2] == "call App_cmd_arctest 1" and lines[3].startswith("EK rc=1"), lines[2:4]
+    assert "call App_unpack_confirm 1 d=|/dest/dir|" in out, out
+    print("[PASS] AE1b. Alt+F9 -> unpack, Alt+Shift+F9 -> test archive, OP_UNPACK -> App_unpack_confirm with the dialog text")
+
+
 def test_mutations(t: Path, baseline: str) -> None:
     src = (ROOT / SRC).read_text()
     muts = [
@@ -196,6 +207,7 @@ def main() -> None:
         t = Path(wd)
         exe = build("x86_64", t / "x86")
         out = test_differential(exe)
+        test_archive_keys(exe)
         if H.available("aarch64"):
             exe_arm = build("aarch64", t / "arm64")
             r = H.run_impl("aarch64", exe_arm, "c", stdin=SCRIPT.encode())

@@ -11,6 +11,7 @@
 #include "duop_string.h"
 
 int64_t g_task_start_ms;
+intptr_t (*g_task_run_hook)(const TaskJob *job, TaskShared *shm);
 int g_task_wake_fd, g_task_op, g_task_parent_pid;
 static int g_task_pipe[2];
 
@@ -83,6 +84,7 @@ static intptr_t tw_item(const TaskJob *job, const char *name)
     os_raise_nofile(4096);
     g_measure_bytes = job->op != TASK_OP_DELETE;
     if (fs_progress_cancelled()) task_worker_exit(shm, -ECANCELED);
+    if (job->op > TASK_OP_DELETE) task_worker_exit(shm, g_task_run_hook ? g_task_run_hook(job, shm) : -ENOSYS);   /* archive unpack / test */
     TwCum *cum = mem_alloc((size_t)job->count * sizeof(TwCum) + 16);
     if (!cum) task_worker_exit(shm, -ENOMEM);
     intptr_t r = tw_scan(job, shm, cum);

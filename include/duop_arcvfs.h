@@ -42,3 +42,4 @@ intptr_t arc_extract_to(const ArcSource *s, const ArcItem *it, int fd, ArcXfer *
  * compression method that is not implemented), -EBADMSG (CRC-32 or size mismatch), -EFBIG, or the write error; 0 when complete and verified */
 intptr_t arc_extract_item(const ArcSource *s, const ArcItem *it, int fd);
 const char *arc_vfs_sub(const DirModel *m);   /* the folder of a model in virtual_mode 2 */
+const char *arc_vfs_orig(const DirModel *m);  /* the real directory the archive was entered from */

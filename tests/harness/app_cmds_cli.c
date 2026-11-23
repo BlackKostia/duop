@@ -130,6 +130,8 @@ int fake_sys_exec_sh_arg(const char *script, const char *arg1, char **envp)
     return 0;
 }
 
+void App_cmd_unpack(App *app) { (void)app; sc_put("call App_cmd_unpack\n"); }
+
 #define FilePane_get_selected_entry fake_FilePane_get_selected_entry
 #define DirModel_entry_name fake_DirModel_entry_name
 #define DirModel_count_selected fake_DirModel_count_selected
@@ -284,6 +286,17 @@ int duop_main(int argc, char **argv, char **envp, const uintptr_t *auxv)
             int sw = call_abi_safe(fn, &g_app);
             if (tag == 'B') { sc_put("ABI_CLOBBER="); sc_num(sw); sc_nl(); }
             else dump_st(is_mv ? "MV" : "CP");
+        } else if (tag == 'A') {                                    /* an archive pane (C only): F5 unpacks, F6 / F8 are refused */
+            int op = (int)sc_tok_i64(&p);
+            g_lm.virtual_mode = 2;
+            g_has_fe = 1;
+            g_fe.flags = 0;
+            g_sel_cnt = 0;
+            if (op == 0) App_cmd_copy(&g_app);
+            else if (op == 1) App_cmd_move(&g_app);
+            else App_cmd_delete(&g_app);
+            g_lm.virtual_mode = 0;
+            dump_st("AR");
         } else if (tag == 'D') {
             g_sel_cnt = (size_t)sc_tok_i64(&p);
             g_has_fe = (int)sc_tok_i64(&p);

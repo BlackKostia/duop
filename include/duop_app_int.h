@@ -8,6 +8,7 @@ typedef struct App App;
 typedef struct Event Event;
 typedef struct FilePane FilePane;
 typedef struct ViewAsDialog ViewAsDialog;
+struct TaskJob;
 
 /* app_choosedir.c */
 void App_write_choosedir(App *app, const char *out_path);
@@ -72,6 +73,10 @@ void App_apply_link(App *app, InputDialog *dlg, int is_hard);
 /* app_ext.c */
 typedef struct Dialog Dialog;
 typedef struct DirModel DirModel;
+void App_cmd_unpack(App *app);                                /* Alt+F9, F5 in an archive pane: ask where to, then unpack (app_arc_cmds.c) */
+void App_cmd_arctest(App *app);                               /* Alt+Shift+F9: decode and verify every member, write nothing */
+void App_unpack_confirm(App *app, const char *dst);           /* the Unpack dialog was confirmed */
+void App_task_launch(App *app, const struct TaskJob *job);           /* fs_task_start + the UI state of a running task (app_task.c) */
 intptr_t App_close_dialog_ext(App *app, Dialog *dlg, FilePane *pane, DirModel *model, int dlg_res);
 int app_handle_ext_key(App *app, int key, int mods);
 

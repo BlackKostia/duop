@@ -4,9 +4,9 @@
 F5 / F6 / F8 inside an archive pane used to open a transfer dialog whose task joined the *archive file* with the entry name
 (arc_populate sets DirModel.path to the archive), so the copy could only fail late and confusingly.
 
-ARO1 F5 on an entry of a .zip / .tar.gz: a status message, no dialog, nothing created in the other pane
-ARO2 F6 and F8 likewise (nothing moved, nothing deleted, the archive untouched)
-ARO3 marked entries (Space) do not change that
+ARO1 F5 on an entry of a .zip / .tar.gz opens the Unpack dialog (not Copy); Esc leaves nothing created in the other pane
+ARO2 F6 and F8: a status message, no dialog (nothing moved, nothing deleted, the archive untouched)
+ARO3 marked entries (Space) do not change that: F5 unpacks them, F8 is refused
 ARO4 outside an archive F5 still opens the Copy dialog (guard is virtual_mode == 2 only)
 """
 import io
@@ -86,10 +86,28 @@ def check_blocked(key, archive_downs, mark=False):
         assert sorted(os.listdir(left)) == before, "the source directory changed"
 
 
-def test_aro1_copy_blocked():
-    check_blocked(F5, 1)   # a.zip
-    check_blocked(F5, 2)   # b.tar.gz
-    print("[PASS] ARO1 F5 in an archive: read-only status, no dialog")
+def check_unpack_dialog(archive_downs, mark=False):
+    with tempfile.TemporaryDirectory(prefix="aro_") as tmp:
+        left, right = make_dirs(tmp)
+        sess = PtySession(BINARY, ["--lang", "en", left, right], cols=120, rows=35)
+        try:
+            enter_archive(sess, archive_downs)
+            if mark:
+                sess.send(b" ", wait=0.15)
+            sess.send(F5, wait=0.4)
+            wait_for(sess, "Unpack")
+            text = sess.vt.full_text()
+            assert READONLY not in text and " Copy " not in text, text
+            sess.send(ESC, wait=0.3)
+        finally:
+            kill_session(sess)
+        assert os.listdir(right) == [], "nothing may be unpacked before the dialog is confirmed"
+
+
+def test_aro1_copy_becomes_unpack():
+    check_unpack_dialog(1)   # a.zip
+    check_unpack_dialog(2)   # b.tar.gz
+    print("[PASS] ARO1 F5 in an archive: the Unpack dialog, not Copy and not read-only")
 
 
 def test_aro2_move_delete_blocked():
@@ -99,10 +117,10 @@ def test_aro2_move_delete_blocked():
     print("[PASS] ARO2 F6 / F8 in an archive: read-only status, no dialog")
 
 
-def test_aro3_marked_entries_blocked():
-    check_blocked(F5, 1, mark=True)
+def test_aro3_marked_entries():
+    check_unpack_dialog(1, mark=True)
     check_blocked(F8, 2, mark=True)
-    print("[PASS] ARO3 marked entries: still read-only")
+    print("[PASS] ARO3 marked entries: F5 unpacks them, F8 stays read-only")
 
 
 def test_aro4_copy_outside_archive_unchanged():
@@ -122,7 +140,7 @@ def test_aro4_copy_outside_archive_unchanged():
 
 
 if __name__ == "__main__":
-    test_aro1_copy_blocked()
+    test_aro1_copy_becomes_unpack()
     test_aro2_move_delete_blocked()
-    test_aro3_marked_entries_blocked()
+    test_aro3_marked_entries()
     test_aro4_copy_outside_archive_unchanged()

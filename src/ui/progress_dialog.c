@@ -73,6 +73,8 @@ const char *ProgressDialog_title_for(int op)
     const LangStrings *ls = i18n_get();
     if (op == TASK_OP_MOVE) return ls->s[LS_task_title_move];
     if (op == TASK_OP_DELETE) return ls->s[LS_task_title_delete];
+    if (op == TASK_OP_UNPACK) return ls->s[LS_task_title_unpack];
+    if (op == TASK_OP_ARCTEST) return ls->s[LS_task_title_arctest];
     return ls->s[LS_task_title_copy];
 }
 

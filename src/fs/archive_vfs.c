@@ -13,6 +13,8 @@ static ArcVfs *vfs_of(const DirModel *m) { return (ArcVfs *)m->arc_ctx; }
 
 const char *arc_vfs_sub(const DirModel *m) { return vfs_of(m)->sub; }
 
+const char *arc_vfs_orig(const DirModel *m) { return vfs_of(m)->orig; }
+
 typedef struct {
     DirModel *m;
     const ArcVfs *v;

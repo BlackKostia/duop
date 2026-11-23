@@ -11,6 +11,7 @@
 #include "duop_ui.h"
 #include "script_cli.h"
 
+uint64_t g_task_skipped;                         /* TaskShared.skipped of the worker reaped last: read by the archive messages */
 static void sc_nl(void) { sc_put("\n"); }
 
 static int64_t sc_tok_i64(char **pp)

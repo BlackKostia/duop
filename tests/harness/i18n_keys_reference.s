@@ -280,6 +280,16 @@ i18n_keys:
     LK arc_readonly, LangStrings.arc_readonly
     LK arc_member_unsupported, LangStrings.arc_member_unsupported
     LK arc_member_bad, LangStrings.arc_member_bad
+    LK app_title_unpack, LangStrings.app_title_unpack
+    LK app_prm_unpack, LangStrings.app_prm_unpack
+    LK task_title_unpack, LangStrings.task_title_unpack
+    LK task_title_arctest, LangStrings.task_title_arctest
+    LK app_ok_unpack, LangStrings.app_ok_unpack
+    LK app_ok_arctest, LangStrings.app_ok_arctest
+    LK arc_issues_pfx, LangStrings.arc_issues_pfx
+    LK arc_issues_sfx, LangStrings.arc_issues_sfx
+    LK arc_bomb, LangStrings.arc_bomb
+    LK arc_not_archive, LangStrings.arc_not_archive
     LK err_cmd_long, LangStrings.err_cmd_long
     LK cfg_truncated, LangStrings.cfg_truncated
     LK err_special, LangStrings.err_special

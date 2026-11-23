@@ -104,6 +104,15 @@ def test_archive_member_errors(exe: Path) -> None:
     print("[PASS] AC1b. an unreadable archive member reports 'unsupported / encrypted' or 'damaged', and the viewer stays closed")
 
 
+def test_archive_pane_commands(exe: Path) -> None:
+    """In an archive pane F5 hands over to the unpack command; F6 and F8 are refused with the read-only message (C side only)."""
+    out = H.run_impl("x86_64", exe, "c", stdin=b"A 0\nA 1\nA 2\n").stdout.decode()
+    assert out.count("call App_cmd_unpack") == 1, out
+    assert out.count("Archive is read-only") == 2, out
+    assert "call App_set_status" in out and "call InputDialog_new" not in out, out
+    print("[PASS] AC1c. F5 in an archive pane is the unpack command; F6 / F8 there are refused as read-only")
+
+
 def test_asm_abi_bug(exe: Path) -> None:
     s = b"B 0\nB 1\n"
     r_ref = H.run_impl("x86_64", exe, "r", stdin=s).stdout.decode()
@@ -158,6 +167,7 @@ def main() -> None:
         exe = build("x86_64", t / "x86")
         out = test_differential(exe, t)
         test_archive_member_errors(exe)
+        test_archive_pane_commands(exe)
         test_asm_abi_bug(exe)
         if H.available("aarch64"):
             exe_arm = build("aarch64", t / "arm64")

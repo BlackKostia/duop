@@ -1,6 +1,7 @@
 /* src/ui/file_pane.c - FilePane widget class: lifecycle, viewport clamping, selection
  * stat lookup, cursor-preserving reload, and parent navigation
  * (freestanding C23; replaces src/ui/file_pane.s, kept as tests/harness/file_pane_reference.s). */
+#include "duop_arc.h"
 #include "duop_classes.h"
 #include "duop_du.h"
 #include "duop_fs.h"
@@ -101,7 +102,8 @@ void FilePane_reload_keep_cursor(FilePane *self, const char *focus_name)
             target = saved;
         }
     }
-    (void)DirModel_reload(m);
+    if (m->virtual_mode == 2) arc_populate(m);                  /* an archive folder is rebuilt from its index, not read from a directory */
+    else (void)DirModel_reload(m);
     if (target) {
         intptr_t idx = DirModel_find_by_name(m, target);
         if (idx >= 0) self->cursor = (uint32_t)idx;

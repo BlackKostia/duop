@@ -134,6 +134,10 @@ static void open_transfer_dlg(App *app, uint32_t op_tag)
 {
     FilePane *pane = (FilePane *)(uintptr_t)app->active_pane;
     DirModel *m = (DirModel *)(uintptr_t)pane->model;
+    if (op_tag == OP_COPY && m->virtual_mode == 2) {                 /* F5 inside an archive unpacks it */
+        App_cmd_unpack(app);
+        return;
+    }
     if (refuse_in_archive(app, m)) return;
     if (DirModel_count_selected(m, nullptr) == 0) {
         FileEntry *fe = FilePane_get_selected_entry(pane);

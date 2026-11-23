@@ -88,6 +88,7 @@ FoOpenResult fo_resolve_eexist_open(int dst_dfd, const char *dst_rel, const File
 intptr_t fo_move_check_conflict(const char *src, const char *dst, char *out_ren);
 
 /* the worker (task_worker.c) */
+extern intptr_t (*g_task_run_hook)(const TaskJob *job, TaskShared *shm);   /* runs the ops above TASK_OP_DELETE (archive unpack / test, set by the app) in the worker */
 intptr_t fs_task_start(const TaskJob *job);                    /* forks the worker: 0 (the caller may free job), -EBUSY, -errno */
 int fs_task_is_active(void);
 int fs_task_wake_fd(void);                                     /* read end that hangs up when the worker exits, or -1 */

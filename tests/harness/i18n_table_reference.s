@@ -313,6 +313,16 @@ en_arc_truncated:      .asciz "Archive is damaged or incomplete: showing what co
 en_arc_readonly:       .asciz "Archive is read-only: copy, move and delete are not available inside it"
 en_arc_member_unsupported: .asciz "This archive member is encrypted or uses an unsupported compression method"
 en_arc_member_bad:     .asciz "Cannot read this archive member: its data is damaged or fails the checksum"
+en_app_title_unpack: .asciz "Unpack"
+en_app_prm_unpack: .asciz "Unpack destination path:"
+en_task_title_unpack: .asciz "Unpacking"
+en_task_title_arctest: .asciz "Testing archive"
+en_app_ok_unpack: .asciz "Unpacked successfully"
+en_app_ok_arctest: .asciz "Archive is OK: every member decoded and verified"
+en_arc_issues_pfx: .asciz "Finished, but "
+en_arc_issues_sfx: .asciz " member(s) could not be used (unsafe, encrypted, unsupported or damaged)"
+en_arc_bomb: .asciz "Refused: the archive would expand more than 1000 times (decompression bomb?)"
+en_arc_not_archive: .asciz "Not a readable archive"
 en_err_cmd_long:       .asciz "Command too long: not executed"
 en_cfg_truncated:      .asciz "Config file too large: the rest was ignored"
 en_err_special:        .asciz "Special file (pipe/socket/device) cannot be copied or moved this way"
@@ -366,6 +376,7 @@ lang_en_table:
     .quad en_pkg_title, en_pkg_hint, en_pkg_empty, en_pkg_install_prompt
     .quad en_pkg_installed, en_pkg_removed, en_pkg_verified, en_pkg_err
     .quad en_pkg_tab_inst, en_pkg_tab_avail, en_arc_truncated, en_arc_readonly, en_arc_member_unsupported, en_arc_member_bad
+    .quad en_app_title_unpack, en_app_prm_unpack, en_task_title_unpack, en_task_title_arctest, en_app_ok_unpack, en_app_ok_arctest, en_arc_issues_pfx, en_arc_issues_sfx, en_arc_bomb, en_arc_not_archive
     .quad en_err_cmd_long, en_cfg_truncated, en_err_special
 .if (. - lang_en_table) != LangStrings._size
     .error "lang_en_table size does not match LangStrings._size"

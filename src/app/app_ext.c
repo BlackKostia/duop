@@ -109,6 +109,7 @@ intptr_t App_close_dialog_ext(App *app, Dialog *dlg, FilePane *pane, DirModel *m
     case OP_PALETTE:
     case OP_FUZZY: app_close_fuzzy_dlg(app, (FuzzyDialog *)dlg, pane); break;
     case OP_VIEWAS: App_view_as_done(app, (ViewAsDialog *)dlg); break;
+    case OP_UNPACK: App_unpack_confirm(app, (const char *)((InputDialog *)dlg)->buf); break;
     default: break;
     }
     return 0;
@@ -167,9 +168,14 @@ static int handle_ext_ctrl(App *app, int key)
     return 0;
 }
 
-static int handle_ext_alt(App *app, int key)
+static int handle_ext_alt(App *app, int key, int mods)
 {
     int lc = key | 0x20;
+    if (key == KEY_F9) {                                            /* Alt+F9 unpack, Alt+Shift+F9 test */
+        if (mods & MOD_SHIFT) App_cmd_arctest(app);
+        else App_cmd_unpack(app);
+        return 1;
+    }
     if (lc == 'p') return app_open_fuzzy(app, 1);
     if (lc == 'a') { App_cmd_chmod(app); return 1; }
     if (lc == 'v') return App_cmd_view_mode(app);
@@ -192,7 +198,7 @@ static int handle_ext_alt(App *app, int key)
 int app_handle_ext_key(App *app, int key, int mods)
 {
     if (mods & MOD_CTRL) return handle_ext_ctrl(app, key);
-    if (mods & MOD_ALT) return handle_ext_alt(app, key);
+    if (mods & MOD_ALT) return handle_ext_alt(app, key, mods);
     if (key == KEY_ENTER) return arc_handle_enter(app);
     return 0;
 }

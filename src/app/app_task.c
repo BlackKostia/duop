@@ -117,12 +117,19 @@ void App_task_start(App *app, int op, const char *dst_input)
     }
     fill_job_names(app, m, job, sel_count, names_len);
     job->names_len = (uint64_t)names_len;
-    intptr_t rc = fs_task_start(job);
+    App_task_launch(app, job);
     mem_free(job);
+}
+
+/* starts the worker for job (the caller frees it) and sets up the UI state of a running task */
+void App_task_launch(App *app, const TaskJob *job)
+{
+    intptr_t rc = fs_task_start(job);
     if (rc < 0) {
         task_status_errno(app, rc);
         return;
     }
+    int op = (int)job->op;
 
     TaskSnap *snap = app_snap(app);
     mem_zero(snap, sizeof *snap);
@@ -137,6 +144,27 @@ void App_task_start(App *app, int op, const char *dst_input)
     app->need_redraw = 1;
 }
 
+/* the status line after an unpack or a test: what failed as a whole, or how many members were left out */
+static void task_finish_archive(App *app, uint32_t op, int64_t result)
+{
+    const LangStrings *lang = i18n_get();
+    if (result == -EFBIG) {
+        App_set_status(app, lang->s[LS_arc_bomb], MSG_ERR);
+    } else if (result == -EINVAL || result == -EOPNOTSUPP) {
+        App_set_status(app, lang->s[LS_arc_not_archive], MSG_ERR);
+    } else if (result != 0) {
+        task_status_errno(app, result);
+    } else if (g_task_skipped) {
+        char msg[512];
+        size_t n = str_copy(msg, lang->s[LS_arc_issues_pfx], sizeof msg);
+        n += u64_to_dec(g_task_skipped, msg + n);
+        (void)str_copy(msg + n, lang->s[LS_arc_issues_sfx], sizeof msg - n);
+        App_set_status(app, msg, MSG_WARN);
+    } else {
+        App_set_status(app, op == TASK_OP_ARCTEST ? lang->s[LS_app_ok_arctest] : lang->s[LS_app_ok_unpack], MSG_OK);
+    }
+}
+
 static void task_finalize(App *app, int64_t result)
 {
     app->task_active = 0;
@@ -147,14 +175,16 @@ static void task_finalize(App *app, int64_t result)
         Object_free((Object *)ad);
     }
     App_reload_panes(app, nullptr);
-    if (result != 0) {
+    uint32_t op = app_snap(app)->op;
+    if (op == TASK_OP_UNPACK || op == TASK_OP_ARCTEST) {
+        task_finish_archive(app, op, result);
+    } else if (result != 0) {
         task_status_errno(app, result);
     } else {
         const LangStrings *lang = i18n_get();
-        TaskSnap *snap = app_snap(app);
         const char *msg = lang->s[LS_app_ok_copy];
-        if (snap->op == TASK_OP_DELETE) msg = lang->s[LS_app_ok_delete];
-        else if (snap->op == TASK_OP_MOVE) msg = lang->s[LS_app_ok_move];
+        if (op == TASK_OP_DELETE) msg = lang->s[LS_app_ok_delete];
+        else if (op == TASK_OP_MOVE) msg = lang->s[LS_app_ok_move];
         App_set_status(app, msg, MSG_OK);
     }
     app->need_redraw = 1;

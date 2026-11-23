@@ -9,6 +9,8 @@
 #include "duop_ui.h"
 #include "script_cli.h"
 
+void arc_populate(DirModel *m) { (void)m; sc_put("call arc_populate\n"); }
+
 static App g_app;
 static int g_fail_obj;
 static int g_fail_dm;

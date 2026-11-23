@@ -155,7 +155,7 @@
 ### 4.1 Повноцінна підтримка архівів (`v2.7.1` → `v2.9.x`, план у [ARCHIVE_TOOLS_PLAN.md](docs/ARCHIVE_TOOLS_PLAN.md))
 - [x] **Фаза 0 (`v2.7.1`)**: `F5`/`F6`/`F8` в архіві показують «Archive is read-only» замість зламаного діалогу; регресійний тест `tests/test_arc_readonly.py`.
 - [x] **Фаза 1 (`v2.8.0`) — масштаб і потоковість**: `mmap`-вхід (`arc_source.c`), динамічний відсортований індекс (`arc_index.c`), потоковий `DEFLATE`/Deflate64 (`inflate_stream.c`) і gzip з CRC (`gzip_dec.c`), повний `tar` (ustar prefix, GNU `L/K`, PAX, base-256, `arc_tar.c`) і `zip` (UTF-8/CP437, ZIP64, префікс SFX, перекриття, `arc_zip.c`), потокове розпакування з перевіркою CRC (`arc_extract.c`); ліміти 4 МіБ / 1024 / 8 МіБ / 64 МіБ зняті.
-- [ ] **Фаза 2 (`v2.8.1`) — розпакування і тест**: `F5` в архіві та `Alt+F9` (`archive_unpack.c`, `TASK_OP_UNPACK`), Zip-Slip/symlink-захист, CRC, `Test Archive`.
+- [x] **Фаза 2 (`v2.9.0`) — розпакування і тест**: `F5` в архіві, `Alt+F9` (розпакувати) і `Alt+Shift+F9` (перевірити) на `arc_unpack*.c`/`arc_path.c`/`arc_task.c` (`TASK_OP_UNPACK`/`TASK_OP_ARCTEST` у `TaskWorker`): `openat(O_NOFOLLOW)`-обхід, Zip-Slip/symlink/hardlink-захист, `.duop-part` + CRC + `rename`, конфлікти, `smart unpack`, ліміт місця і захист від бомби, прогрес і скасування.
 - [ ] **Фаза 3 (`v2.8.2`) — пакування**: `Alt+F5` → `.tar`, `.tar.gz`, `.zip`/ZIP64 (`deflate.c`, `tar_write.c`, `zip_write.c`, `archive_pack.c`), атомарний вивід, перевірка після пакування.
 - [ ] **Фаза 4 (`v2.9.0`) — кодеки**: `bzip2`, `xz`/LZMA2, `zstd` (`.tar.bz2/.xz/.zst`, окремі `.gz/.bz2/.xz/.zst`, zip-методи 9/12/14/93/95).
 - [ ] **Фаза 5 (`v2.9.x`)**: міграція пакетного менеджера на новий API, вкладені архіви, перегляд записів у `F9`, бенчмарк.
