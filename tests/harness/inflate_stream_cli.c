@@ -10,6 +10,10 @@
 #include "duop_inflate.h"
 #include "duop_pal.h"
 
+#ifndef CLI_DECODE                                   /* tests/harness/gzip_cli.c includes this file with its own decoder */
+#define CLI_DECODE(stream, len, flags, max_out, sink, res) inflate_stream(stream, len, flags, max_out, sink, res)
+#endif
+
 static uint8_t g_in[48u << 20], g_ref[24u << 20];
 
 typedef struct {
@@ -46,7 +50,7 @@ int duop_main(int argc, char **argv, char **envp, const uintptr_t *auxv)
         Probe p = {0xFFFFFFFFu, 0, fail_after, 0, 0, false};
         CodecSink sink = {probe_write, &p};
         CodecResult res = {0, 0};
-        intptr_t rc = inflate_stream(stream, len, flags, max_out, &sink, &res);
+        intptr_t rc = CLI_DECODE(stream, len, flags, max_out, &sink, &res);
         sc_put("rc="); sc_num(rc);
         sc_put(" in="); sc_num((int64_t)res.consumed);
         sc_put(" out="); sc_num((int64_t)res.produced);

@@ -72,6 +72,7 @@ C_SRCS := \
 	src/core/memcheck.c \
 	src/fs/inflate.c \
 	src/fs/inflate_stream.c \
+	src/fs/gzip_dec.c \
 	src/tui/theme.c \
 	src/tui/kbd_map.c \
 	src/tui/kbd_layout.c \
@@ -365,6 +366,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_hash.py
 	python3 tests/test_c_inflate.py
 	python3 tests/test_c_inflate_stream.py
+	python3 tests/test_c_gzip_dec.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py
 	python3 tests/test_c_try.py

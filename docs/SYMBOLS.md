@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 633
+- **Exported `.global` Symbols**: 634
 
 ## Structs (`include/*.inc`)
 
@@ -502,6 +502,8 @@
   - `git_refresh` — `int git_refresh(DirModel *dm)`
   - `git_lookup` — `int git_lookup(DirModel *dm, const char *name)`
   - `git_branch` — `const char *git_branch(DirModel *dm)`
+- **`src/fs/gzip_dec.c`**
+  - `gzip_decode` — `intptr_t gzip_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/img_bmp.c`**
   - `img_bmp_decode` — `int img_bmp_decode(const uint8_t *d, size_t n, Image *out)`
 - **`src/fs/img_core.c`**
