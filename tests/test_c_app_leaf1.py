@@ -129,7 +129,7 @@ def test_mutations(t: Path, baseline: str) -> None:
         ("arc", "up-neg", "if (idx < 0) return 0;", "if (idx <= 0) return 0;"),
         ("arc", "ent-2", "if (r == 2) {", "if (0) {"),
         ("arc", "ent-3", "if (r == 3) App_set_status", "if (0) App_set_status"),
-        ("arc", "ext-rc", "return arc_extract_entry", "return -1; (void)arc_extract_entry"),
+        ("arc", "ext-rc", "return (int)arc_extract_entry", "return -1; (void)arc_extract_entry"),
         ("vw", "img-va", "if (fmt) app->active_dialog = (uint64_t)(uintptr_t)ViewAsDialog_new(app, path, fmt);",
          "if (0) app->active_dialog = (uint64_t)(uintptr_t)ViewAsDialog_new(app, path, fmt);"),
         ("vw", "vad-mode", "ViewerDialog_set_mode(v, (int)dlg->choice);",

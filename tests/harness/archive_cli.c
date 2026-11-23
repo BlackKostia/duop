@@ -1,26 +1,22 @@
-/* Freestanding harness: the frozen asm archive layer (archive_vfs_reference.s + archive_extract_reference.s, x86_64, ref_ prefix) or
- * src/fs/archive_parse.c + archive_vfs.c (compiled into this unit, paths in AR_SRC1 / AR_SRC2), on the C DirModel stack.
+/* Freestanding harness: the frozen asm archive parsers (archive_vfs_reference.s, x86_64, ref_ prefix) or src/fs/archive_parse.c (compiled
+ * into this unit, path in AR_SRC1). The virtual folder is tested in tests/test_c_arc_vfs.py (harness arcvfs_cli.c).
  * argv[1] = ref | c. Script on stdin:
- *   P <file> <t|z|g>   parse a whole file (tar / zip index, or gunzip): the entries (or the gunzipped length and hash); a fault
- *                      inside the parser prints "fault" (the fault guard is installed)
- *   N <dir>            a pane model of dir;   E <name>   arc_enter_model on the visible entry called name;   U   arc_nav_up_model
- *   X <name>           arc_extract_entry of the visible entry: its bytes (hash, length)
- *   L                  the pane listing */
+ *   P <file> <t|z|g|Z>  parse a whole file (tar / zip index, or gunzip): the entries (or the gunzipped length and hash); a fault
+ *                       inside the parser prints "fault" (the fault guard is installed); Z = a zip right behind a PROT_NONE page */
 #include "script_cli.h"
 #include "duop_arc.h"
 #include "duop_pal.h"
 
+/* the frozen asm object still links the DirModel stack of its virtual folder (unused here) */
 int git_refresh(DirModel *m) { (void)m; return 0; }
 void git_free_ctx(DirModel *m) { m->git_ctx = nullptr; }
 
 #include AR_SRC1
-#include AR_SRC2
 
 #ifdef __x86_64__
 extern void ref_arc_parse_tar(ArcCtx *), ref_arc_parse_zip(ArcCtx *);
 extern void *ref_arc_ungzip(const uint8_t *, uint64_t, uint64_t *);
-extern int ref_arc_is_archive(const char *), ref_arc_enter_model(DirModel *, const FileEntry *), ref_arc_nav_up_model(DirModel *);
-extern int ref_arc_extract_entry(DirModel *, const FileEntry *, char *);
+extern int ref_arc_is_archive(const char *);
 #define CALL(f, ...) (g_ref ? ref_##f(__VA_ARGS__) : f(__VA_ARGS__))
 #define CALLV(f, ...) do { if (g_ref) ref_##f(__VA_ARGS__); else f(__VA_ARGS__); } while (0)
 #else
@@ -29,9 +25,6 @@ extern int ref_arc_extract_entry(DirModel *, const FileEntry *, char *);
 #endif
 
 static bool g_ref;
-static DirModel *g_m;
-static char g_tmp[PATH_MAX];
-
 static int sc_split(char *line, char **f, int max)
 {
     int n = 0;
@@ -103,22 +96,6 @@ static void cmd_parse(const char *file, char kind_arg)
     mem_free(ctx->entries); mem_free(ctx);
 }
 
-static FileEntry *find_visible(const char *name)
-{
-    intptr_t i = DirModel_find_by_name(g_m, name);
-    return i < 0 ? nullptr : DirModel_get_entry(g_m, i);
-}
-
-static void put_listing(void)
-{
-    sc_put(" path="); sc_esc(g_m->path); sc_put(" vm="); sc_num(g_m->virtual_mode); sc_put(" n="); sc_num((int64_t)g_m->count);
-    sc_put(" sub="); sc_esc(g_m->arc_ctx ? ((ArcCtx *)g_m->arc_ctx)->sub : "-");
-    for (uint64_t i = 0; i < g_m->count; i++) {
-        const FileEntry *e = &g_m->entries[g_m->order[i]];
-        sc_put(" "); sc_esc(g_m->name_pool + e->name_off); sc_put(":"); sc_num(e->flags & (FE_IS_DIR | FE_IS_PARENT)); sc_put(":"); sc_num(e->size);
-    }
-}
-
 int duop_main(int argc, char **argv, char **envp, const uintptr_t *auxv)
 {
     (void)envp; (void)auxv;
@@ -132,32 +109,11 @@ int duop_main(int argc, char **argv, char **envp, const uintptr_t *auxv)
         if (!n) continue;
         switch (f[0][0]) {
         case 'P': if (n < 3) continue; cmd_parse(f[1], f[2][0]); break;
-        case 'N': if (g_m) Object_free(&g_m->base); g_m = DirModel_new(f[1]); if (g_m) { while (g_m->is_loading) (void)DirModel_step_load(g_m, 0); }
-                  sc_put("N"); if (g_m) put_listing(); break;
-        case 'E': { if (!g_m) continue; FileEntry *e = n > 1 ? find_visible(f[1]) : nullptr; if (e) DirModel_ensure_entry_stat(g_m, e); int r = CALL(arc_enter_model, g_m, e);
-                    sc_put("E r="); sc_num(r); put_listing(); break; }
-        case 'U': { if (!g_m) continue; int r = CALL(arc_nav_up_model, g_m); while (g_m->is_loading) (void)DirModel_step_load(g_m, 0);
-                    sc_put("U r="); sc_num(r); put_listing(); break; }
-        case 'X': {
-            if (!g_m || n < 2) continue;
-            int r = CALL(arc_extract_entry, g_m, find_visible(f[1]), g_tmp);
-            sc_put("X r="); sc_num(r);
-            if (r == 0) {
-                static uint8_t buf[1 << 22];
-                size_t got = 0;
-                (void)fs_read_file_head(g_tmp, buf, sizeof buf, &got);
-                sc_put(" len="); sc_num((int64_t)got); sc_put(" h="); sc_num((int64_t)fnv(buf, got));
-                (void)os_unlinkat(AT_FDCWD, g_tmp, 0);
-            }
-            break;
-        }
-        case 'L': if (!g_m) continue; sc_put("L"); put_listing(); break;
         default: continue;
         }
         sc_put("\n");
         sc_flush();
     }
-    if (g_m) Object_free(&g_m->base);
     sc_flush();
     return 0;
 }

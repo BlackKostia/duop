@@ -164,7 +164,7 @@ def make_zip64(path, payload=b"hello from zip64\n"):
 
 
 def test_zip64_and_truncation_warning():
-    """ZIP64 entries must parse/view cleanly, and >4 MiB archives must warn user."""
+    """ZIP64 entries must parse/view cleanly, and a tar above the old 4 MiB limit is entered whole (no truncation warning)."""
     with tempfile.TemporaryDirectory() as tmp:
         l, r = os.path.join(tmp, "left"), os.path.join(tmp, "right")
         os.makedirs(l)
@@ -192,7 +192,8 @@ def test_zip64_and_truncation_warning():
             wait_for(sess, "b_big.tar")
             sess.send(b"\x1b[B")   # b_big.tar
             sess.send(b"\r")
-            wait_for(sess, "4 MiB")
+            wait_for(sess, "huge.bin")                         # listed although it lies beyond the old 4 MiB read limit
+            assert "limit" not in sess.vt.full_text() and "damaged" not in sess.vt.full_text(), sess.vt.full_text()
             sess.send(b"\x1b[21~")
             _, st = os.waitpid(sess.pid, 0)
             assert os.WIFEXITED(st) and os.WEXITSTATUS(st) == 0

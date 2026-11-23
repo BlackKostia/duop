@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 642
+- **Exported `.global` Symbols**: 645
 
 ## Structs (`include/*.inc`)
 
@@ -28,7 +28,7 @@
 | `Theme` | `include/types.inc` | `name`, `bg`, `surface`, `surface_alt`, `header_bg`, `header_fg`, `accent`, `accent_fg`, `border_active`, `border_inactive`, `text`, `muted`, `dir_fg`, `exec_fg`, `link_fg`, `hidden_fg`, `selected_fg`, `selected_bg`, `cursor_active_bg`, `cursor_inactive_bg`, `badge_bg`, `badge_hover_bg`, `badge_fg`, `dialog_bg`, `dialog_border`, `ok_fg`, `warn_fg`, `err_fg`, `scroll_track`, `scroll_thumb`, `pad` |
 | `DuProgress` | `include/types.inc` | `start_ms`, `dirs`, `files`, `bytes`, `done`, `total`, `cancel`, `phase` |
 | `DataSpec` | `include/types.inc` | `env`, `sub`, `ext`, `load` |
-| `LangStrings` | `include/types.inc` | `code`, `name`, `hdr_brand`, `hdr_mode_dual`, `hdr_mode_prev`, `hdr_btn_quit`, `hdr_btn_help`, `hdr_btn_lang`, `hdr_btn_hid_on`, `hdr_btn_hid_off`, `hdr_btn_prev`, `hdr_theme_pfx`, `f_labels`, `sb_dir_tag`, `sb_filter_pfx`, `sb_filter_sfx`, `sb_hint_right`, `msg_lang_switched`, `fp_col_name`, `fp_col_size`, `fp_col_mod`, `fp_col_perm`, `fp_dir_badge`, `fp_sel_pfx`, `fp_sel_mid`, `fp_sel_end`, `fp_sum_dirs`, `fp_sum_files`, `fp_flt_tag`, `pv_title`, `pv_dir_msg`, `pv_bin_hdr`, `pv_empty`, `pv_sz_lbl`, `pv_perm_lbl`, `err_perm`, `err_exists`, `err_noent`, `err_notempty`, `err_isdir`, `err_notdir`, `err_same`, `err_generic`, `dlg_btn_ok`, `dlg_btn_cancel`, `dlg_btn_yes`, `dlg_btn_no`, `dlg_btn_close`, `dlg_btn_hex`, `dlg_title_help`, `dlg_title_viewer`, `dlg_vw_hint`, `dlg_hlp_hint`, `help_lines`, `app_title_mkdir`, `app_prm_mkdir`, `app_title_newfile`, `app_prm_newfile`, `app_title_rename`, `app_prm_rename`, `app_title_copy`, `app_prm_copy`, `app_title_move`, `app_prm_move`, `app_title_filter`, `app_prm_filter`, `app_title_goto`, `app_prm_goto`, `app_title_delete`, `app_msg_del_one`, `app_msg_del_many`, `app_sel_items_sfx`, `app_ok_mkdir`, `app_ok_newfile`, `app_ok_rename`, `app_ok_copy`, `app_ok_move`, `app_ok_delete`, `app_ok_refresh`, `app_err_parent`, `app_err_isdir`, `fp_loading_pfx`, `fp_huge_badge`, `fp_abort_badge`, `app_load_aborted`, `task_title_copy`, `task_title_move`, `task_title_delete`, `task_btn_pause`, `task_btn_resume`, `task_btn_bg`, `task_lbl_files`, `task_lbl_eta`, `task_lbl_scan`, `task_lbl_paused`, `task_lbl_canceling`, `task_sb_hint`, `err_canceled`, `err_busy`, `app_title_quit_task`, `app_msg_quit_task`, `dlg_title_usermenu`, `um_hint`, `dlg_title_bookmarks`, `bm_hint`, `dlg_title_frecency`, `fre_hint`, `msg_bm_added`, `msg_hist_empty`, `msg_tab_last`, `dlg_title_conflict`, `cfl_btn_overwrite`, `cfl_btn_skip`, `cfl_btn_rename`, `cfl_lbl_forall`, `cfl_hint`, `dlg_title_search`, `srch_lbl_name`, `srch_lbl_grep`, `srch_hint`, `fp_search_badge`, `msg_search_none`, `dlg_title_info`, `dlg_title_chmod`, `dlg_title_symlink`, `dlg_title_hardlink`, `prm_link_target`, `chm_hint`, `msg_trashed`, `msg_undone`, `msg_undo_empty`, `dlg_title_palette`, `dlg_title_fuzzy`, `fuz_hint`, `fp_du_badge`, `br_title`, `br_tmpl`, `br_find`, `br_repl`, `ctx_view`, `ctx_copy`, `ctx_move`, `ctx_copy_path`, `ctx_delete`, `msg_copied_path`, `diff_pfx`, `term_title`, `img_unsup`, `dlg_title_viewas`, `vas_image`, `vas_hex`, `vas_text`, `vas_hint`, `vw_img_hint`, `img_fit`, `pal_theme`, `pal_lang`, `pal_preview`, `pal_hidden`, `pal_help`, `pal_rename`, `pal_view`, `pal_edit`, `pal_copy`, `pal_move`, `pal_mkdir`, `pal_delete`, `pal_newfile`, `pal_filter`, `pal_goto`, `pal_refresh`, `pal_usermenu`, `pal_shell`, `pal_quit`, `cli_version`, `cli_usage`, `help_tab_overview`, `help_tab_instr`, `help_instr_lines`, `du_scan_title`, `du_lbl_folders`, `du_lbl_scanned`, `du_unit_dirs`, `du_unit_files`, `du_scan_hint`, `msg_du_canceled`, `pkg_title`, `pkg_hint`, `pkg_empty`, `pkg_install_prompt`, `pkg_installed`, `pkg_removed`, `pkg_verified`, `pkg_err`, `pkg_tab_inst`, `pkg_tab_avail`, `arc_truncated`, `arc_readonly`, `err_cmd_long`, `cfg_truncated`, `err_special` |
+| `LangStrings` | `include/types.inc` | `code`, `name`, `hdr_brand`, `hdr_mode_dual`, `hdr_mode_prev`, `hdr_btn_quit`, `hdr_btn_help`, `hdr_btn_lang`, `hdr_btn_hid_on`, `hdr_btn_hid_off`, `hdr_btn_prev`, `hdr_theme_pfx`, `f_labels`, `sb_dir_tag`, `sb_filter_pfx`, `sb_filter_sfx`, `sb_hint_right`, `msg_lang_switched`, `fp_col_name`, `fp_col_size`, `fp_col_mod`, `fp_col_perm`, `fp_dir_badge`, `fp_sel_pfx`, `fp_sel_mid`, `fp_sel_end`, `fp_sum_dirs`, `fp_sum_files`, `fp_flt_tag`, `pv_title`, `pv_dir_msg`, `pv_bin_hdr`, `pv_empty`, `pv_sz_lbl`, `pv_perm_lbl`, `err_perm`, `err_exists`, `err_noent`, `err_notempty`, `err_isdir`, `err_notdir`, `err_same`, `err_generic`, `dlg_btn_ok`, `dlg_btn_cancel`, `dlg_btn_yes`, `dlg_btn_no`, `dlg_btn_close`, `dlg_btn_hex`, `dlg_title_help`, `dlg_title_viewer`, `dlg_vw_hint`, `dlg_hlp_hint`, `help_lines`, `app_title_mkdir`, `app_prm_mkdir`, `app_title_newfile`, `app_prm_newfile`, `app_title_rename`, `app_prm_rename`, `app_title_copy`, `app_prm_copy`, `app_title_move`, `app_prm_move`, `app_title_filter`, `app_prm_filter`, `app_title_goto`, `app_prm_goto`, `app_title_delete`, `app_msg_del_one`, `app_msg_del_many`, `app_sel_items_sfx`, `app_ok_mkdir`, `app_ok_newfile`, `app_ok_rename`, `app_ok_copy`, `app_ok_move`, `app_ok_delete`, `app_ok_refresh`, `app_err_parent`, `app_err_isdir`, `fp_loading_pfx`, `fp_huge_badge`, `fp_abort_badge`, `app_load_aborted`, `task_title_copy`, `task_title_move`, `task_title_delete`, `task_btn_pause`, `task_btn_resume`, `task_btn_bg`, `task_lbl_files`, `task_lbl_eta`, `task_lbl_scan`, `task_lbl_paused`, `task_lbl_canceling`, `task_sb_hint`, `err_canceled`, `err_busy`, `app_title_quit_task`, `app_msg_quit_task`, `dlg_title_usermenu`, `um_hint`, `dlg_title_bookmarks`, `bm_hint`, `dlg_title_frecency`, `fre_hint`, `msg_bm_added`, `msg_hist_empty`, `msg_tab_last`, `dlg_title_conflict`, `cfl_btn_overwrite`, `cfl_btn_skip`, `cfl_btn_rename`, `cfl_lbl_forall`, `cfl_hint`, `dlg_title_search`, `srch_lbl_name`, `srch_lbl_grep`, `srch_hint`, `fp_search_badge`, `msg_search_none`, `dlg_title_info`, `dlg_title_chmod`, `dlg_title_symlink`, `dlg_title_hardlink`, `prm_link_target`, `chm_hint`, `msg_trashed`, `msg_undone`, `msg_undo_empty`, `dlg_title_palette`, `dlg_title_fuzzy`, `fuz_hint`, `fp_du_badge`, `br_title`, `br_tmpl`, `br_find`, `br_repl`, `ctx_view`, `ctx_copy`, `ctx_move`, `ctx_copy_path`, `ctx_delete`, `msg_copied_path`, `diff_pfx`, `term_title`, `img_unsup`, `dlg_title_viewas`, `vas_image`, `vas_hex`, `vas_text`, `vas_hint`, `vw_img_hint`, `img_fit`, `pal_theme`, `pal_lang`, `pal_preview`, `pal_hidden`, `pal_help`, `pal_rename`, `pal_view`, `pal_edit`, `pal_copy`, `pal_move`, `pal_mkdir`, `pal_delete`, `pal_newfile`, `pal_filter`, `pal_goto`, `pal_refresh`, `pal_usermenu`, `pal_shell`, `pal_quit`, `cli_version`, `cli_usage`, `help_tab_overview`, `help_tab_instr`, `help_instr_lines`, `du_scan_title`, `du_lbl_folders`, `du_lbl_scanned`, `du_unit_dirs`, `du_unit_files`, `du_scan_hint`, `msg_du_canceled`, `pkg_title`, `pkg_hint`, `pkg_empty`, `pkg_install_prompt`, `pkg_installed`, `pkg_removed`, `pkg_verified`, `pkg_err`, `pkg_tab_inst`, `pkg_tab_avail`, `arc_truncated`, `arc_readonly`, `arc_member_unsupported`, `arc_member_bad`, `err_cmd_long`, `cfg_truncated`, `err_special` |
 
 ## OOP Classes (`CLASS_BEGIN`)
 
@@ -380,6 +380,8 @@
 
 ### Filesystem & Codecs (`src/fs/`)
 
+- **`src/fs/arc_extract.c`**
+  - `arc_extract_item` — `intptr_t arc_extract_item(const ArcSource *s, const ArcItem *it, int fd)`
 - **`src/fs/arc_index.c`**
   - `arc_idx_free` — `void arc_idx_free(ArcIndex *x)`
   - `arc_item_link` — `const char *arc_item_link(const ArcIndex *x, const ArcItem *it)`
@@ -387,6 +389,9 @@
   - `arc_idx_finish` — `int arc_idx_finish(ArcIndex *x)`
   - `arc_idx_find` — `const ArcItem *arc_idx_find(const ArcIndex *x, const char *path)`
   - `arc_idx_list` — `int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx)`
+- **`src/fs/arc_source.c`**
+  - `arc_source_open` — `int arc_source_open(ArcSource *s, const char *path, int type)`
+  - `arc_source_close` — `void arc_source_close(ArcSource *s)`
 - **`src/fs/arc_tar.c`**
   - `arc_tar_parse` — `int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info)`
 - **`src/fs/arc_zip.c`**
@@ -401,7 +406,7 @@
   - `arc_free_ctx` — `void arc_free_ctx(DirModel *m)`
   - `arc_nav_up_model` — `int arc_nav_up_model(DirModel *m)`
   - `arc_enter_model` — `int arc_enter_model(DirModel *m, const FileEntry *ent)`
-  - `arc_extract_entry` — `int arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path)`
+  - `arc_extract_entry` — `intptr_t arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path)`
 - **`src/fs/dir_cache.c`**
   - `dircache_store` — `int dircache_store(DirModel *m)`
   - `dircache_fetch` — `int dircache_fetch(DirModel *m, const FileStat *st)`

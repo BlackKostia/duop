@@ -169,7 +169,7 @@ chars = ;ςερτυθιοπασδφγηξκλζχψωβνμ
 ## Known Limitations & Roadmap
 
 - **Linux-only for now** (`x86_64` and `aarch64` directly invoke Linux kernel syscalls via the PAL; a FreeBSD PAL backend is planned for `v3.0`).
-- **Archive VFS is currently read/extract-only** (`.tar`, `.tar.gz`, `.zip`); streaming archive creation, `TaskQueue` with SHA-256 post-copy verification, and `Drop Stack` are scheduled for `v2.8.x`.
+- **Archive VFS is browse / view only for now** (`.tar`, `.tar.gz`, `.zip` / ZIP64 of any size, entries streamed and CRC-checked); unpacking (`F5` / `Alt+F9`), creation (`Alt+F5`), bzip2 / xz / zstd, and the other items — `TaskQueue` with SHA-256 post-copy verification and `Drop Stack` — are scheduled for `v2.8.x` / `v2.9.x`, see [docs/ARCHIVE_TOOLS_PLAN.md](docs/ARCHIVE_TOOLS_PLAN.md); `TaskQueue` with SHA-256 post-copy verification, and `Drop Stack` are scheduled for `v2.8.x`.
 - **Network filesystems (`sftp://`, `docker://`)** are designed as out-of-process VFS packages (`v2.9.x`) so the core binary remains dependency-free.
 
 See [`ROADMAP.md`](ROADMAP.md), [`docs/PRODUCT_STRATEGY_2026-11-20.md`](docs/PRODUCT_STRATEGY_2026-11-20.md), and [`docs/DEVELOPMENT_PLAN_2026-11-17.md`](docs/DEVELOPMENT_PLAN_2026-11-17.md). Contributions are welcome — read [`CONTRIBUTING.md`](CONTRIBUTING.md).

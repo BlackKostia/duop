@@ -79,7 +79,6 @@ TaskShared.conflict_dst_sz: .space 8
 TaskShared.cur_name:    .space 256      # == NAME_MAX (asserted in src/fs/task.s)
 TaskShared.conflict_name: .space 256    # == NAME_MAX
 TaskShared._size:
-
 # --- TaskSnap (UI-side consistent snapshot of the running task) ---
 .struct 0
 TaskSnap.total_bytes: .space 8
@@ -97,7 +96,6 @@ TaskSnap.canceling:   .space 4
 TaskSnap.pad:         .space 4
 TaskSnap.cur_name:    .space 256        # == NAME_MAX
 TaskSnap._size:
-
 # --- TaskJob (heap job description handed to fs_task_start; names are NUL-separated) ---
 .struct 0
 TaskJob.names_len: .space 8        # bytes used in names[]
@@ -109,7 +107,6 @@ TaskJob.src_dir:   .space 4096         # == PATH_MAX (asserted in src/fs/task.s)
 TaskJob.dst:       .space 4096
 TaskJob.names:                     # variable-length "a\0b\0..." block follows
 TaskJob._size:
-
 # --- DCSlot (LRU directory cache snapshot, see src/fs/dir_cache.s) ---
 .struct 0
 DCSlot.entries:     .space 8
@@ -138,7 +135,6 @@ DCSlot.huge_mode:   .space 4
 DCSlot.filter:      .space 64      # == FILTER_MAX
 DCSlot.path:        .space 4096    # == PATH_MAX
 DCSlot._size:
-
 # --- Theme (128 bytes) ---
 .struct 0
 Theme.name:               .space 8
@@ -173,7 +169,6 @@ Theme.scroll_track:       .space 4
 Theme.scroll_thumb:       .space 4
 Theme.pad:                .space 4
 Theme._size:
-
 # --- DuProgress: live counters of a Disk Usage subtree walk (fs/du_parallel.s) ---
 .struct 0
 DuProgress.start_ms: .space 8   # os_clock_ms() when the walk began
@@ -185,7 +180,6 @@ DuProgress.total:    .space 4   # top-level folders to walk
 DuProgress.cancel:   .space 4   # set by the progress callback (Esc): walkers stop
 DuProgress.phase:    .space 4   # DU_PHASE_RUN, then DU_PHASE_DONE for the final call
 DuProgress._size:
-
 # --- DataSpec: one kind of runtime data file (tui/data_dirs.s) ---
 .struct 0
 DataSpec.env:   .space 8   # "DUOP_LAYOUTS=": ':'-separated dirs that replace the default path
@@ -393,6 +387,8 @@ LangStrings.pkg_tab_inst:       .space 8
 LangStrings.pkg_tab_avail:      .space 8
 LangStrings.arc_truncated:      .space 8
 LangStrings.arc_readonly:       .space 8
+LangStrings.arc_member_unsupported: .space 8
+LangStrings.arc_member_bad:     .space 8
 LangStrings.err_cmd_long:       .space 8
 LangStrings.cfg_truncated:      .space 8
 LangStrings.err_special:        .space 8

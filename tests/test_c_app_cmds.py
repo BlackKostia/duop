@@ -66,7 +66,6 @@ def build_script(work: Path) -> str:
         "V 1 1 0 0 0",     # FE_IS_DIR
         "V 1 64 0 0 0",    # FE_LINK_DIR
         "V 1 0 2 0 0",     # archive OK
-        "V 1 0 2 -1 0",    # archive fail
         "V 1 0 3 0 0",     # VFS OK
         "V 1 0 3 0 -1",    # VFS fail
         "V 1 0 0 0 0",     # normal file
@@ -91,6 +90,18 @@ def test_differential(exe: Path, t: Path) -> str:
         assert needle in out, f"coverage missing: {needle}"
     print(f"[PASS] AC1. app_cmds matches frozen asm byte for byte ({len(out.splitlines())} lines)")
     return out
+
+
+def test_archive_member_errors(exe: Path) -> None:
+    """F3 on an archive member that cannot be read says why (the frozen asm returned silently): encrypted / unsupported method
+    (-EACCES, -EOPNOTSUPP) and damaged data (anything else); the viewer is not opened; success still opens it."""
+    script = b"".join(f"V 1 0 2 {rc} 0\n".encode() for rc in (-13, -95, -74, -22, -5, 0))
+    out = H.run_impl("x86_64", exe, "c", stdin=script).stdout.decode()
+    unsup, bad = "encrypted or uses an unsupported compression method", "its data is damaged or fails the checksum"
+    msgs = [ln for ln in out.splitlines() if ln.startswith("call App_set_status")]
+    assert [unsup in m for m in msgs] == [True, True, False, False, False] and all(bad in m for m in msgs[2:]), msgs
+    assert out.count("call App_open_viewer 1 p=|/tmp/arc_item|") == 1 and out.count("call App_open_viewer") == 1, out
+    print("[PASS] AC1b. an unreadable archive member reports 'unsupported / encrypted' or 'damaged', and the viewer stays closed")
 
 
 def test_asm_abi_bug(exe: Path) -> None:
@@ -146,6 +157,7 @@ def main() -> None:
         (t / "w").mkdir()
         exe = build("x86_64", t / "x86")
         out = test_differential(exe, t)
+        test_archive_member_errors(exe)
         test_asm_abi_bug(exe)
         if H.available("aarch64"):
             exe_arm = build("aarch64", t / "arm64")

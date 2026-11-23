@@ -39,5 +39,5 @@ int arc_handle_enter(App *app)
 int arc_extract_selected(FilePane *fp, char *out_tmp_path)
 {
     FileEntry *e = FilePane_get_selected_entry(fp);
-    return arc_extract_entry((DirModel *)(uintptr_t)fp->model, e, out_tmp_path);
+    return (int)arc_extract_entry((DirModel *)(uintptr_t)fp->model, e, out_tmp_path);   /* 0 or -errno */
 }

@@ -67,7 +67,13 @@ void App_cmd_view(App *app)
     char full[PATH_MAX];
     DirModel *m = (DirModel *)(uintptr_t)pane->model;
     if (m->virtual_mode == 2) {
-        if (arc_extract_selected(pane, full) != 0) return;
+        int rc = arc_extract_selected(pane, full);
+        if (rc != 0) {                                                  /* the member could not be read: say why */
+            bool unsupported = rc == -EOPNOTSUPP || rc == -EACCES;
+            const LangStrings *lang = i18n_get();
+            App_set_status(app, unsupported ? lang->s[LS_arc_member_unsupported] : lang->s[LS_arc_member_bad], MSG_ERR);
+            return;
+        }
     } else {
         const char *name = DirModel_entry_name(m, fe);
         if (path_join(full, m->path, name, PATH_MAX) < 0) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""src/fs/archive_parse.c + archive_vfs.c versus the frozen assembly (tests/harness/archive_vfs_reference.s +
+"""src/fs/archive_parse.c versus the frozen assembly (tests/harness/archive_vfs_reference.s +
 archive_extract_reference.s): the .tar / .tar.gz / .zip index and the archive as a virtual folder of a pane.
 
 AR1 parsers, differential (x86_64): tar (files, directories, long names, sizes clamped to truncated data), zip (stored, deflated,
@@ -8,9 +8,7 @@ AR1 parsers, differential (x86_64): tar (files, directories, long names, sizes c
 AR2 a defect of the asm, fixed: the ZIP central-directory bound "offset + 46 > length" wraps for a ZIP64 offset near 2^64, so a
     crafted archive made the parser read before its buffer (a crash when the buffer starts a mapping, as for the package manager, which parses without the fault
     guard); the C parser compares against the remaining length and returns no entries
-AR3 the virtual folder: entering .tar / .tar.gz / .tgz / .zip files of a real directory, descending into folders synthesised from
-    the paths, ".." up to the archive root and back out (the cursor on the archive), extracting stored, deflated and tar entries to
-    temp files, an archive above 4 MiB (entered, flagged truncated), a corrupt one (not entered)
+AR3 (moved: the virtual folder is tests/test_c_arc_vfs.py)
 AR4 qemu-aarch64: the C modules give the x86_64 results; AR5 mutation check
 """
 
@@ -26,19 +24,19 @@ from pathlib import Path
 import c_harness as H
 
 ROOT = H.ROOT
-SRCS = ["src/fs/archive_parse.c", "src/fs/archive_vfs.c"]
+SRCS = ["src/fs/archive_parse.c"]
 REFS = ["tests/harness/archive_vfs_reference.s", "tests/harness/archive_extract_reference.s"]
 MODS = ["src/fs/dir_model.c", "src/fs/dir_model_filter.c", "src/fs/dir_model_load.c", "src/fs/dir_model_stream.c", "src/fs/dir_model_stat.c",
         "src/fs/dir_model_select.c", "src/fs/dir_sort.c", "src/fs/dir_sort_radix.c", "src/fs/dir_cache.c", "src/fs/dir_search.c",
         "src/fs/dir_search_match.c", "src/fs/inflate.c", "src/fs/file_ops_delete.c", "src/fs/file_ops.c", "src/fs/file_ops_copy.c",
         "src/fs/file_ops_read.c", "src/fs/file_ops_overwrite.c", "src/fs/task.c", "src/fs/task_conflict.c", "src/core/oop_rt.c",
-        "src/core/string_path.c", "src/core/tmpfile.c", "build/i18n_en.c"]
+        "src/core/string_path.c", "src/core/tmpfile.c", "build/i18n_en.c"]      # the DirModel stack: the frozen asm object links it for its folder code
 CORE = ["src/core/string.c", "src/core/utf8.c", "src/core/memory.c", "src/core/syscall.c", "src/core/try_rt.c", "src/core/mem_prims.c"]
 
 
 def build(arch: str, t: Path, srcs: list[str] | None = None) -> Path:
     t.mkdir(parents=True, exist_ok=True)
-    s1, s2 = [s if Path(s).is_absolute() else str(ROOT / s) for s in (srcs or SRCS)]
+    (s1,) = [s if Path(s).is_absolute() else str(ROOT / s) for s in (srcs or SRCS)]
     inc = ["-I", str(ROOT / f"include/os/linux/{arch}"), "-I", str(ROOT / "include")]
     uring = t / "pal_uring.o"
     subprocess.run([*H.ARCHS[arch]["as_"], *inc, str(ROOT / f"src/os/linux/{arch}/pal_uring.s"), "-o", str(uring)], check=True, capture_output=True)
@@ -55,7 +53,7 @@ def build(arch: str, t: Path, srcs: list[str] | None = None) -> Path:
     stub.write_text('#include "duop_task.h"\n#include "duop_tui.h"\nconst LangStrings *i18n_get(void) { return &lang_en_table; }\n'
                     'int g_task_parent_pid; TaskShared *g_task_shm;\n')
     return H.build(arch, t, ["tests/harness/archive_cli.c", str(stub), *MODS, *CORE], extra,
-                   cflags=["-I", str(ROOT / "tests/harness"), "-I", str(ROOT / "build"), f'-DAR_SRC1="{s1}"', f'-DAR_SRC2="{s2}"'])
+                   cflags=["-I", str(ROOT / "tests/harness"), "-I", str(ROOT / "build"), f'-DAR_SRC1="{s1}"'])
 
 
 def make_tar(rng: random.Random, gz: bool = False) -> bytes:
@@ -210,63 +208,6 @@ def test_zip64_wrap(exe: Path, t: Path) -> None:
     print("[PASS] AR2. fixed: a ZIP64 directory offset near 2^64 no longer wraps the bound check (asm: read outside the buffer)")
 
 
-def folder(t: Path) -> Path:
-    d = t / "pane"
-    (d / "plain").mkdir(parents=True)
-    rng = random.Random(7)
-    bio = io.BytesIO()
-    with tarfile.open(fileobj=bio, mode="w") as tf:
-        for name, data in (("top.txt", b"top"), ("dir/a.txt", b"A" * 100), ("dir/sub/b.bin", bytes(range(256)) * 9), ("dir2/c", b"c"), ("empty/", b"")):
-            ti = tarfile.TarInfo(name.rstrip("/"))
-            if name.endswith("/"):
-                ti.type = tarfile.DIRTYPE
-                tf.addfile(ti)
-            else:
-                ti.size = len(data)
-                tf.addfile(ti, io.BytesIO(data))
-    (d / "t.tar").write_bytes(bio.getvalue())
-    (d / "t.tar.gz").write_bytes(gzip.compress(bio.getvalue(), mtime=0))
-    (d / "t.tgz").write_bytes(gzip.compress(bio.getvalue(), mtime=0))
-    zb = io.BytesIO()
-    with zipfile.ZipFile(zb, "w") as zf:
-        zf.writestr("z/stored.txt", b"stored data", compress_type=zipfile.ZIP_STORED)
-        zf.writestr("z/deflated.txt", b"deflate me " * 500, compress_type=zipfile.ZIP_DEFLATED)
-        zf.writestr("root.md", b"# root", compress_type=zipfile.ZIP_DEFLATED)
-    (d / "t.zip").write_bytes(zb.getvalue())
-    big = io.BytesIO()
-    with zipfile.ZipFile(big, "w") as zf:
-        zf.writestr("big.bin", bytes(rng.randrange(256) for _ in range(5 * 1024 * 1024)), compress_type=zipfile.ZIP_STORED)
-    (d / "big.zip").write_bytes(big.getvalue())
-    bt = io.BytesIO()                                       # > 4 MiB with entries: the listing overwrites the archive's own row
-    with tarfile.open(fileobj=bt, mode="w") as tf:
-        for name, size in (("a.txt", 10), ("b.txt", 20), ("c.txt", 30), ("huge.bin", 4 * 1024 * 1024 + 8192)):
-            ti = tarfile.TarInfo(name)
-            ti.size = size
-            tf.addfile(ti, io.BytesIO(b"A" * size))
-    (d / "big.tar").write_bytes(bt.getvalue())
-    (d / "bad.tar.gz").write_bytes(b"not gzip at all")
-    return d
-
-
-def nav_script(d: Path) -> str:
-    s = f"N {d}\nE t.tar\nE dir\nE sub\nX b.bin\nU\nX a.txt\nU\nX top.txt\nE dir2\nU\nU\nL\n"
-    s += "E t.tar.gz\nE dir\nX a.txt\nU\nU\nE t.tgz\nU\nE t.zip\nE z\nX stored.txt\nX deflated.txt\nU\nX root.md\nU\n"
-    s += "E big.zip\nU\nE big.tar\nX huge.bin\nU\nE bad.tar.gz\nE plain\nE nope\n"
-    return s
-
-
-def test_folder(exe: Path, t: Path) -> str:
-    s = nav_script(folder(t))
-    a, b = run(exe, "ref", s), run(exe, "c", s)
-    assert a == b, "virtual folder: oracle and C differ:\n" + "\n".join(f"  ref {x}\n  c   {y}" for x, y in zip(a.splitlines(), b.splitlines()) if x != y)
-    assert b.count("E r=3 ") == 2 and "X r=0 len=5500 " in b and " vm=2 " in b, "coverage"
-    print(f"[PASS] AR3. virtual folder identical to the asm ({len(b.splitlines())} steps: .tar / .tar.gz / .tgz / .zip, folders, "
-          "'..' and back out, extraction of stored / deflated / tar entries, > 4 MiB, corrupt)")
-    return b
-
-
-# Equivalent, not listed: dropping "if (size > comp) size = comp;" in arc_entry_data - the parser already clamps a stored entry's
-# size to its compressed size and that to the data behind the local header, so extraction never sees size > comp.
 MUTANTS = [
     ("src/fs/archive_parse.c", "tar name cap", "(const char *)raw + off, 100);", "(const char *)raw + off, 101);"),
     ("src/fs/archive_parse.c", "tar size clamp", "if (size > avail) size = avail;", ""),
@@ -284,34 +225,24 @@ MUTANTS = [
     ("src/fs/archive_parse.c", "gzip fname", "for (int f = 8; f <= 16; f += 8)", "for (int f = 16; f <= 16; f += 8)"),
     ("src/fs/archive_parse.c", "gzip hcrc", "if (flg & 2) p += 2;", ""),
     ("src/fs/archive_parse.c", "gzip cap floor", "if (cap < 65536) cap = 65536;", ""),
-    ("src/fs/archive_vfs.c", "dedupe", "if (!name[0] || DirModel_find_by_name(m, name) >= 0) continue;", "if (!name[0]) continue;"),
-    ("src/fs/archive_vfs.c", "synthesised folder", "if (*p == '/') { *p = 0; dir = true; break; }", "if (*p == '/') { *p = 0; break; }"),
-    ("src/fs/archive_vfs.c", "up one level", "while (i && ctx->sub[i - 1] != '/') i--;", "i = 0;"),
-    ("src/fs/archive_vfs.c", "cursor on archive", "return (int32_t)cur >= 0 ? (int)cur : 0;", "return 0;"),
-    ("src/fs/archive_vfs.c", "truncated flag", "return truncated ? 3 : 1;", "return 1;"),
-    ("src/fs/archive_vfs.c", "sub slash", "if (n < PATH_MAX - 2) { ctx->sub[n] = '/'; ctx->sub[n + 1] = 0; }", ""),
-    ("src/fs/archive_vfs.c", "gunzip skipped", "    if (ctx->type == ARC_TGZ) {", "    if (false) {"),
 ]
 
 
-def test_mutants(t: Path, scripts: tuple[str, str], expect: tuple[str, str]) -> None:
-    srcs = {s: (ROOT / s).read_text() for s in SRCS}
+def test_mutants(t: Path, script: str, expect: str) -> None:
+    src = (ROOT / SRCS[0]).read_text()
     for f, name, old, _ in MUTANTS:
-        assert old in srcs[f], f"mutation anchor vanished: {name}"
+        assert old in src, f"mutation anchor vanished: {name}"
     noticed: dict[str, bool] = {}
 
     def job(i: int, f: str, name: str, old: str, new: str):
         def go() -> None:
             mt = t / f"m{i}"
             mt.mkdir()
-            paths = []
-            for s in SRCS:
-                p = mt / Path(s).name
-                p.write_text(srcs[s].replace(old, new, 1) if s == f else srcs[s])
-                paths.append(str(p))
+            p = mt / Path(f).name
+            p.write_text(src.replace(old, new, 1))
             try:
-                exe = build("x86_64", mt, paths)
-                noticed[name] = any(run(exe, "c", sc).strip() != e.strip() for sc, e in zip(scripts, expect))
+                exe = build("x86_64", mt, [str(p)])
+                noticed[name] = run(exe, "c", script).strip() != expect.strip()
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired, AssertionError):
                 noticed[name] = True
         return go
@@ -319,7 +250,7 @@ def test_mutants(t: Path, scripts: tuple[str, str], expect: tuple[str, str]) -> 
     H.parallel([job(i, *m) for i, m in enumerate(MUTANTS)])
     survivors = sorted(n for n, ok in noticed.items() if not ok)
     assert not survivors, f"mutants not noticed: {survivors}"
-    print(f"[PASS] AR5. {len(MUTANTS)}/{len(MUTANTS)} mutants of the C modules are noticed")
+    print(f"[PASS] AR5. {len(MUTANTS)}/{len(MUTANTS)} mutants of the C parsers are noticed")
 
 
 def main() -> None:
@@ -328,16 +259,14 @@ def main() -> None:
         exe = build("x86_64", t / "x86")
         parsed = test_parsers(exe, t)
         test_zip64_wrap(exe, t)
-        folder_out = test_folder(exe, t)
-        scripts = (parse_script(corpus(t / "again")), nav_script(t / "pane"))
-        expect = (run(exe, "c", scripts[0]), folder_out)
+        script = parse_script(corpus(t / "again"))
         if H.available("aarch64"):
             a64 = build("aarch64", t / "a64")
-            assert [run(a64, "c", sc, "aarch64") for sc in scripts] == list(expect), "qemu-aarch64 differs"
-            print("[PASS] AR4. qemu-aarch64: the C modules give the x86_64 results")
+            assert run(a64, "c", script, "aarch64") == run(exe, "c", script), "qemu-aarch64 differs"
+            print("[PASS] AR4. qemu-aarch64: the C parsers give the x86_64 results")
         else:
             print("[SKIP] AR4: aarch64 toolchain/qemu not installed")
-        test_mutants(t, scripts, expect)
+        test_mutants(t, script, run(exe, "c", script))
     print("ALL C ARCHIVE TESTS PASSED.")
 
 

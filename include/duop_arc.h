@@ -38,12 +38,13 @@ void arc_parse_tar(ArcCtx *ctx);
 void arc_parse_zip(ArcCtx *ctx);
 void *arc_ungzip(const uint8_t *src, uint64_t src_len, uint64_t *out_len);   /* mem_alloc'd data or NULL */
 
-/* the virtual folder (archive_vfs.c) */
+/* the virtual folder (archive_vfs.c on arc_source.c / arc_index.c / arc_tar.c / arc_zip.c: include/duop_arcvfs.h). ArcEntry / ArcCtx and the
+ * parsers above are the package manager's (pkg_archive.c) until it moves to the new engine. */
 void arc_populate(DirModel *m);                                /* the entries of ctx->sub as a listing */
 void arc_free_ctx(DirModel *m);
 int arc_nav_up_model(DirModel *m);                             /* -1: not in an archive; else the cursor */
-int arc_enter_model(DirModel *m, const FileEntry *ent);        /* 0 no, 1 entered, 2 "..", 3 entered but truncated (> 4 MiB) */
-int arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path);   /* the entry into a temp file: 0 / -1 */
+int arc_enter_model(DirModel *m, const FileEntry *ent);        /* 0 no, 1 entered, 2 "..", 3 entered but the archive is damaged / incomplete */
+intptr_t arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path);   /* the member into a temp file: 0, or -errno (EACCES encrypted, EOPNOTSUPP method, EBADMSG checksum) */
 
 int ds_append_entry(DirModel *m, const char *rel_name, const FileStat *st);   /* dir_search.c */
 int ds_append_parent(DirModel *m);

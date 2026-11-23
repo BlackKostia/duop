@@ -154,7 +154,7 @@
 
 ### 4.1 Повноцінна підтримка архівів (`v2.7.1` → `v2.9.x`, план у [ARCHIVE_TOOLS_PLAN.md](docs/ARCHIVE_TOOLS_PLAN.md))
 - [x] **Фаза 0 (`v2.7.1`)**: `F5`/`F6`/`F8` в архіві показують «Archive is read-only» замість зламаного діалогу; регресійний тест `tests/test_arc_readonly.py`.
-- [ ] **Фаза 1 (`v2.8.0`) — масштаб і потоковість**: `mmap`-вхід (`arc_source.c`), динамічний відсортований індекс (`arc_index.c`), потоковий `DEFLATE` (`inflate_stream.c`), повний `tar` (ustar prefix, GNU `L/K`, PAX, base-256) і `zip` (UTF-8, ZIP64, перевірка перекриттів); зняття лімітів 4 МіБ / 1024.
+- [x] **Фаза 1 (`v2.8.0`) — масштаб і потоковість**: `mmap`-вхід (`arc_source.c`), динамічний відсортований індекс (`arc_index.c`), потоковий `DEFLATE`/Deflate64 (`inflate_stream.c`) і gzip з CRC (`gzip_dec.c`), повний `tar` (ustar prefix, GNU `L/K`, PAX, base-256, `arc_tar.c`) і `zip` (UTF-8/CP437, ZIP64, префікс SFX, перекриття, `arc_zip.c`), потокове розпакування з перевіркою CRC (`arc_extract.c`); ліміти 4 МіБ / 1024 / 8 МіБ / 64 МіБ зняті.
 - [ ] **Фаза 2 (`v2.8.1`) — розпакування і тест**: `F5` в архіві та `Alt+F9` (`archive_unpack.c`, `TASK_OP_UNPACK`), Zip-Slip/symlink-захист, CRC, `Test Archive`.
 - [ ] **Фаза 3 (`v2.8.2`) — пакування**: `Alt+F5` → `.tar`, `.tar.gz`, `.zip`/ZIP64 (`deflate.c`, `tar_write.c`, `zip_write.c`, `archive_pack.c`), атомарний вивід, перевірка після пакування.
 - [ ] **Фаза 4 (`v2.9.0`) — кодеки**: `bzip2`, `xz`/LZMA2, `zstd` (`.tar.bz2/.xz/.zst`, окремі `.gz/.bz2/.xz/.zst`, zip-методи 9/12/14/93/95).
@@ -168,7 +168,7 @@
 
 ### 4.3 Безпека екосистеми, кросплатформність і техборг (не реалізовано)
 - [ ] **Криптографічний підпис реєстру пакетів (`registry.tsv`)**: перевірка Ed25519/minisign-підпису індексу розширень (на додачу до наявного SHA-256 архівів) та курировані VFS-пакети (`docker://`, `systemd://`, `s3://`).
-- [ ] **Повний порт на Linux AArch64 та FreeBSD**: перенесення прикладних шарів (`core/`, `tui/`, `fs/`, `ui/`, `app/`) на AArch64 (включно з нативним `io_uring` у PAL) та реалізація `src/os/freebsd/` (після підтвердження попиту від спільноти).
+- [ ] **Порт під Windows (`duop.exe` через MSYS2 / Cygwin POSIX PAL) та FreeBSD**: окремий ізольований compile-time PAL у `src/os/windows/x86_64/` (~520 рядків C, 0 змін у 171 прикладному модулі, детальний план у [WINDOWS_PORT_PLAN.md](docs/WINDOWS_PORT_PLAN.md)) та `src/os/freebsd/` (після підтвердження попиту від спільноти).
 - [ ] **Закриття техборгу в [`lean_baseline.json`](.agents/skills/duop-lean-modules/scripts/lean_baseline.json)**: декомпозиція 5 великих модулів (зокрема [file_pane_render.s](src/ui/file_pane_render.s) — 1223 рядки) і 39 функцій понад бюджет у 80 рядків (`StatusBar_render`, `ScreenBuffer_flush`, `DirModel_step_load` тощо).
 
 ---
