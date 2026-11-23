@@ -167,7 +167,7 @@ int arc_idx_finish(ArcIndex *x)
 }
 
 /* first position in order whose name is >= path */
-static uint32_t lower_bound(const ArcIndex *x, const char *path)
+uint32_t arc_idx_lower(const ArcIndex *x, const char *path)
 {
     uint32_t lo = 0, hi = x->unique;
     while (lo < hi) {
@@ -178,9 +178,21 @@ static uint32_t lower_bound(const ArcIndex *x, const char *path)
     return lo;
 }
 
+const ArcItem *arc_idx_find_raw(const ArcIndex *x, const char *raw, size_t len)
+{
+    char buf[1024];
+    if (len >= sizeof buf - 2) return nullptr;
+    bool is_dir, unsafe;
+    size_t n = normalise_into(buf, raw, len, &is_dir, &unsafe);
+    if (!n) return nullptr;
+    if (!is_dir) n--;
+    buf[n] = 0;
+    return arc_idx_find(x, buf);
+}
+
 const ArcItem *arc_idx_find(const ArcIndex *x, const char *path)
 {
-    uint32_t i = lower_bound(x, path);
+    uint32_t i = arc_idx_lower(x, path);
     if (i >= x->unique) return nullptr;
     const ArcItem *it = &x->items[x->order[i]];
     return str_cmp(x->names + it->name_off, path) == 0 ? it : nullptr;
@@ -211,7 +223,7 @@ static uint32_t arc_idx_skip(const ArcIndex *x, uint32_t from, const char *prefi
 int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx)
 {
     size_t plen = str_len(prefix);
-    uint32_t i = lower_bound(x, prefix);
+    uint32_t i = arc_idx_lower(x, prefix);
     while (i < x->unique) {
         const ArcItem *it = &x->items[x->order[i]];
         const char *n = x->names + it->name_off;

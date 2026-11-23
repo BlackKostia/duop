@@ -35,7 +35,7 @@ _Static_assert(sizeof(TaskShared) <= TASK_SHM_SIZE, "TaskShared must fit in one 
 typedef struct TaskJob {
     uint64_t names_len;                  /* bytes used in names[] */
     uint32_t op, count;
-    uint32_t join_dst;                   /* 1: dst/<name>, 0: dst verbatim (single item) */
+    uint32_t join_dst;                   /* 1: dst/<name>, 0: dst verbatim (single item); unpack: bit 1 = smart unpack (see arc_task.c) */
     uint32_t pad;
     char src_dir[PATH_MAX];
     char dst[PATH_MAX];
@@ -80,6 +80,7 @@ void fs_task_shutdown(void);                                   /* cancel, reap, 
 #define CONFLICT_ACT_SKIP 2
 #define CONFLICT_ACT_RENAME 3
 extern int g_copy_had_skip;                                    /* a copy skipped an item: a move keeps its source */
+void task_make_unique_name(int dfd, const char *orig, char *out);        /* "<stem>_<n><ext>" of orig that dfd does not hold yet (PATH_MAX buffer) */
 intptr_t fs_task_resolve_conflict(int dst_dfd, const char *dst_rel, uint64_t src_sz, uint64_t dst_sz, char *out_name);
 int fs_task_check_conflict(char *out_name, uint64_t *out_src_sz, uint64_t *out_dst_sz);   /* UI: 1 while the worker waits */
 void fs_task_reply_conflict(int action, int for_all);

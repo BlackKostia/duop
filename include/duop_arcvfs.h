@@ -26,7 +26,18 @@ typedef struct ArcVfs {                     /* DirModel.arc_ctx while virtual_mo
 
 /* maps the archive (a .tar.gz is gunzipped to an unlinked temp file first): 0, -errno, or -EFBIG past ARC_OPEN_TGZ_MAX. Only regular non-empty files. */
 int arc_source_open(ArcSource *s, const char *path, int type);
+int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked);   /* the same with another limit for a .tar.gz (the worker's) */
 void arc_source_close(ArcSource *s);
+/* An extraction in progress: progress() is called after every chunk written (a negative result stops it and becomes the error), buf != NULL
+ * collects the data in memory (at most cap bytes) instead of writing to a descriptor (the target of a symlink member). */
+typedef struct ArcXfer {
+    intptr_t (*progress)(void *ctx, uint64_t n);
+    void *ctx;
+    uint8_t *buf;
+    size_t cap, len;
+    intptr_t sink_err;              /* out: the failure of the write or of progress() - the data was fine, the destination is not */
+} ArcXfer;
+intptr_t arc_extract_to(const ArcSource *s, const ArcItem *it, int fd, ArcXfer *x);   /* as arc_extract_item; x may be NULL */
 /* writes the bytes of a regular member to fd, streaming: -EINVAL (not a plain member / damaged), -EACCES (encrypted), -EOPNOTSUPP (links, or a
  * compression method that is not implemented), -EBADMSG (CRC-32 or size mismatch), -EFBIG, or the write error; 0 when complete and verified */
 intptr_t arc_extract_item(const ArcSource *s, const ArcItem *it, int fd);

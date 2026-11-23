@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 646
+- **Exported `.global` Symbols**: 657
 
 ## Structs (`include/*.inc`)
 
@@ -382,19 +382,33 @@
 ### Filesystem & Codecs (`src/fs/`)
 
 - **`src/fs/arc_extract.c`**
-  - `arc_extract_item` — `intptr_t arc_extract_item(const ArcSource *s, const ArcItem *it, int fd)`
+  - `arc_extract_to` — `intptr_t arc_extract_to(const ArcSource *s, const ArcItem *it, int fd, ArcXfer *x)`
 - **`src/fs/arc_index.c`**
   - `arc_idx_free` — `void arc_idx_free(ArcIndex *x)`
   - `arc_item_link` — `const char *arc_item_link(const ArcIndex *x, const ArcItem *it)`
   - `arc_idx_add` — `int arc_idx_add(ArcIndex *x, const char *name, size_t name_len, const char *link, size_t link_len, const ArcItem *proto)`
   - `arc_idx_finish` — `int arc_idx_finish(ArcIndex *x)`
+  - `arc_idx_lower` — `uint32_t arc_idx_lower(const ArcIndex *x, const char *path)`
+  - `arc_idx_find_raw` — `const ArcItem *arc_idx_find_raw(const ArcIndex *x, const char *raw, size_t len)`
   - `arc_idx_find` — `const ArcItem *arc_idx_find(const ArcIndex *x, const char *path)`
   - `arc_idx_list` — `int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx)`
+- **`src/fs/arc_path.c`**
+  - `arc_dest_parent` — `intptr_t arc_dest_parent(int root, const char *rel, bool create, const char **leaf)`
+  - `arc_link_safe` — `bool arc_link_safe(const char *rel, const char *target)`
 - **`src/fs/arc_source.c`**
-  - `arc_source_open` — `int arc_source_open(ArcSource *s, const char *path, int type)`
+  - `arc_source_open_max` — `int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked)`
   - `arc_source_close` — `void arc_source_close(ArcSource *s)`
 - **`src/fs/arc_tar.c`**
   - `arc_tar_parse` — `int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info)`
+- **`src/fs/arc_task.c`**
+  - `arc_task_run` — `intptr_t arc_task_run(const TaskJob *job, TaskShared *shm)`
+- **`src/fs/arc_unpack.c`**
+  - `arc_unpack` — `intptr_t arc_unpack(const char *archive, const char *dst, const char *names, uint32_t count, const ArcUnpackOpts *o, ArcUnpackReport *r)`
+  - `arc_test` — `intptr_t arc_test(const char *archive, ArcUnpackReport *r)`
+- **`src/fs/arc_unpack_item.c`**
+  - `arc_xfer_progress` — `intptr_t arc_xfer_progress(void *ctx, uint64_t n)`
+  - `arc_put_member` — `int arc_put_member(ArcUnp *u, const ArcItem *it, const char *rel)`
+  - `arc_put_dir_times` — `void arc_put_dir_times(ArcUnp *u)`
 - **`src/fs/arc_zip.c`**
   - `arc_zip_parse` — `int arc_zip_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info)`
 - **`src/fs/archive_parse.c`**
@@ -634,6 +648,7 @@
   - `fs_progress_cancelled` — `int fs_progress_cancelled(void)`
   - `task_measure` — `int task_measure(const char *path)`
 - **`src/fs/task_conflict.c`**
+  - `task_make_unique_name` — `void task_make_unique_name(int dfd, const char *orig, char *out)`
   - `fs_task_resolve_conflict` — `intptr_t fs_task_resolve_conflict(int dst_dfd, const char *dst_rel, uint64_t src_sz, uint64_t dst_sz, char *out_name)`
   - `fs_task_check_conflict` — `int fs_task_check_conflict(char *out_name, uint64_t *out_src_sz, uint64_t *out_dst_sz)`
   - `fs_task_reply_conflict` — `void fs_task_reply_conflict(int action, int for_all)`

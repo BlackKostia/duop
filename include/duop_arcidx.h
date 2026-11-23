@@ -13,6 +13,7 @@
 #define ARC_F_ENCRYPTED 8u          /* listed, but its data cannot be read */
 #define ARC_F_UNSAFE 16u            /* a ".." component: kept for reports, never listed and never unpacked */
 #define ARC_F_SPECIAL 32u           /* device, fifo, socket: listed, never created */
+#define ARC_F_TRUNCATED 64u         /* the archive ends inside this member: its data is incomplete and is never extracted */
 
 #define ARC_IDX_MAX_ITEMS 8388608u  /* 8 Mi members (~450 MB of table): more is refused with -EFBIG */
 #define ARC_IDX_MAX_NAME 65535u
@@ -57,3 +58,5 @@ const ArcItem *arc_idx_find(const ArcIndex *x, const char *path);      /* exact 
 int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx);
 const char *arc_item_name(const ArcIndex *x, const ArcItem *it);
 const char *arc_item_link(const ArcIndex *x, const ArcItem *it);       /* NULL without a link target */
+uint32_t arc_idx_lower(const ArcIndex *x, const char *s);             /* the position in order[] of the first name >= s (unique when none) */
+const ArcItem *arc_idx_find_raw(const ArcIndex *x, const char *raw, size_t len);   /* find() of a name as an archive writes it ("./a//b"): NULL when absent or too long */

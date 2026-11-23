@@ -12,7 +12,7 @@ static intptr_t temp_write(void *ctx, const uint8_t *buf, size_t len)
     return r < 0 ? r : 0;
 }
 
-static int map_gunzipped(ArcSource *s, const uint8_t *gz, uint64_t gz_len)
+static int map_gunzipped(ArcSource *s, const uint8_t *gz, uint64_t gz_len, uint64_t max)
 {
     char path[PATH_MAX];
     intptr_t fd = tmp_open_unique("arc_tar", ".tmp", path, sizeof path);
@@ -21,7 +21,7 @@ static int map_gunzipped(ArcSource *s, const uint8_t *gz, uint64_t gz_len)
     int ifd = (int)fd;
     CodecSink sink = {temp_write, &ifd};
     CodecResult res;
-    intptr_t r = gzip_decode(gz, gz_len, ARC_OPEN_TGZ_MAX, &sink, &res);
+    intptr_t r = gzip_decode(gz, gz_len, max, &sink, &res);
     if (r < 0 || !res.produced) {
         (void)os_close(ifd);
         return r < 0 ? (int)r : -EINVAL;
@@ -35,7 +35,9 @@ static int map_gunzipped(ArcSource *s, const uint8_t *gz, uint64_t gz_len)
     return 0;
 }
 
-int arc_source_open(ArcSource *s, const char *path, int type)
+int arc_source_open(ArcSource *s, const char *path, int type) { return arc_source_open_max(s, path, type, ARC_OPEN_TGZ_MAX); }
+
+int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked)
 {
     mem_zero(s, sizeof *s);
     s->type = type;
@@ -59,7 +61,7 @@ int arc_source_open(ArcSource *s, const char *path, int type)
     TryFrame f;
     volatile int rc = -EIO;
     if (os_try_begin(&f) == 0) {                                              /* the .gz may be cut short under the mapping */
-        rc = map_gunzipped(s, m, (uint64_t)st.size);
+        rc = map_gunzipped(s, m, (uint64_t)st.size, max_unpacked);
         os_try_end(&f);
     }
     os_munmap(m, (size_t)st.size);

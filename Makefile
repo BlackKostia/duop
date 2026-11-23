@@ -78,6 +78,10 @@ C_SRCS := \
 	src/fs/arc_zip.c \
 	src/fs/arc_source.c \
 	src/fs/arc_extract.c \
+	src/fs/arc_path.c \
+	src/fs/arc_unpack_item.c \
+	src/fs/arc_unpack.c \
+	src/fs/arc_task.c \
 	src/tui/theme.c \
 	src/tui/kbd_map.c \
 	src/tui/kbd_layout.c \
@@ -376,6 +380,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_arc_tar.py
 	python3 tests/test_c_arc_zip.py
 	python3 tests/test_c_arc_vfs.py
+	python3 tests/test_c_arc_unpack.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py
 	python3 tests/test_c_fsmeta.py

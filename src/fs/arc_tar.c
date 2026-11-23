@@ -167,12 +167,13 @@ static size_t tar_name(const uint8_t *h, const Ext *ext, char *buf, const char *
     return k + n;
 }
 
-static int tar_add(ArcIndex *x, const uint8_t *h, const Ext *ext, char type, uint64_t data_off, uint64_t size, ArcParseInfo *info)
+static int tar_add(ArcIndex *x, const uint8_t *h, const Ext *ext, char type, uint64_t data_off, uint64_t size, bool torn, ArcParseInfo *info)
 {
     ArcItem pr = {0};
     uint64_t v;
     pr.off = data_off;
     pr.size = pr.comp_size = size;
+    if (torn) pr.flags |= ARC_F_TRUNCATED;
     pr.mtime = ext->has_mtime ? ext->mtime : tar_num(h + 136, 12, &v) ? (int64_t)v : 0;
     pr.mode = tar_num(h + 100, 8, &v) ? (uint32_t)(v & 07777) : 0;
     if (type == '1') pr.flags |= ARC_F_HARDLINK;
@@ -233,12 +234,13 @@ int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *
         }
         if (ext.has_size) size = ext.size;
         if (type >= '1' && type <= '6') size = 0;                             /* links, devices, directories, fifos carry no data */
-        if (size > avail) {
+        bool torn = size > avail;
+        if (torn) {
             size = avail;
             info->damaged = 1;
         }
         if (type != 'V' && type != 'D' && type != 'M' && type != 'N') {
-            int r = tar_add(x, h, &ext, type, data_off, size, info);
+            int r = tar_add(x, h, &ext, type, data_off, size, torn, info);
             if (r) return r;
         }
         ext = (Ext){0};

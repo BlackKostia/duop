@@ -18,7 +18,7 @@ int g_copy_had_skip;
 
 /* "<stem>_<n><ext>" of orig (the extension: the last '.' of the last component that is not its first byte) that dfd does not hold
  * yet, into out (PATH_MAX); after UNIQUE_TRIES failures out keeps the last candidate */
-static void task_make_unique_name(int dfd, const char *orig, char *out)
+void task_make_unique_name(int dfd, const char *orig, char *out)
 {
     const char *dot = nullptr, *p = orig;
     for (; *p; p++) {

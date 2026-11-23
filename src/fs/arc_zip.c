@@ -215,18 +215,20 @@ static int zip_record(ArcIndex *x, const uint8_t *d, uint64_t len, const uint8_t
     if (len - lho < 30 || load_le32(d + lho) != SIG_LH) { info->damaged = 1; return 0; }
     uint64_t hdr = 30 + (uint64_t)load_le16(d + lho + 26) + load_le16(d + lho + 28);
     if (hdr > len - lho) { info->damaged = 1; return 0; }
-    if (ex.comp > len - lho - hdr) {                                          /* data beyond the file: what is there */
+    bool torn = ex.comp > len - lho - hdr;
+    if (torn) {                                                               /* data beyond the file: what is there */
         ex.comp = len - lho - hdr;
         info->damaged = 1;
     }
     if (!method && ex.size > ex.comp) ex.size = ex.comp;
     pr.off = lho;
+    if (torn) pr.flags |= ARC_F_TRUNCATED;
     pr.size = ex.size;
     pr.comp_size = ex.comp;
     pr.mtime = ex.has_mtime ? ex.mtime : dos_time(load_le16(r + 12), load_le16(r + 14));
     pr.crc32 = load_le32(r + 16);
     pr.method = (uint16_t)method;
-    pr.flags = zip_kind(load_le16(r + 4), load_le32(r + 38), &pr.mode);
+    pr.flags |= zip_kind(load_le16(r + 4), load_le32(r + 38), &pr.mode);
     if ((gp & 1) || method == 99 || ex.aes) {
         pr.flags |= ARC_F_ENCRYPTED;
         info->encrypted++;
