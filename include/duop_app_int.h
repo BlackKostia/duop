@@ -17,6 +17,7 @@ void app_mouse_hover(App *app, Event *evt);
 /* app_arc.c */
 int arc_nav_up(FilePane *fp);
 int arc_handle_enter(App *app);
+int arc_open_entry(App *app, FilePane *pane);                 /* the entry under pane's cursor as an archive (Enter and double click): 1 when handled */
 int arc_extract_selected(FilePane *fp, char *out_tmp_path);
 
 /* app_view.c */

@@ -19,9 +19,9 @@ int arc_nav_up(FilePane *fp)
     return 1;
 }
 
-int arc_handle_enter(App *app)
+/* the entry under the cursor of `ap` as an archive: 1 when the archive layer took it (entered a folder / archive, went up, or said why not) */
+int arc_open_entry(App *app, FilePane *ap)
 {
-    FilePane *ap = (FilePane *)(uintptr_t)app->active_pane;
     FileEntry *e = FilePane_get_selected_entry(ap);
     int r = arc_enter_model((DirModel *)(uintptr_t)ap->model, e);
     if (r == 0) return 0;
@@ -41,6 +41,8 @@ int arc_handle_enter(App *app)
     app->need_redraw = 1;
     return 1;
 }
+
+int arc_handle_enter(App *app) { return arc_open_entry(app, (FilePane *)(uintptr_t)app->active_pane); }
 
 int arc_extract_selected(FilePane *fp, char *out_tmp_path)
 {

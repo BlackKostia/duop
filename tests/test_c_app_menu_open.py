@@ -189,12 +189,21 @@ def test_mutations(t: Path, baseline: str) -> None:
     print(f"[PASS] AMO3. {len(muts)}/{len(muts)} mutants killed across app_menu & app_open")
 
 
+def test_archive_first(exe: Path) -> None:
+    """A double click (App_open_selected_entry) asks the archive layer first: handled -> no viewer; not handled -> the viewer as before (C only)."""
+    out = H.run_impl("x86_64", exe, "c", stdin=b"O 2 1\nO 2 0\n").stdout.decode().splitlines()
+    assert [l for l in out if l.startswith("OA")] == ["OA dlg=0", "OA dlg=1"], out
+    assert out.count("call ViewerDialog_new 1 p=|/act/a.zip|") == 1, out           # only the unhandled entry reaches the viewer
+    print("[PASS] AM1b. double click / Enter in a pane: the archive layer gets the entry first, a handled archive opens no viewer")
+
+
 def main() -> None:
     with H.workdir() as wd:
         t = Path(wd)
         (t / "w").mkdir()
         exe = build("x86_64", t / "x86")
         out = test_differential(exe, t)
+        test_archive_first(exe)
         if H.available("aarch64"):
             exe_arm = build("aarch64", t / "arm64")
             r = H.run_impl("aarch64", exe_arm, "c", stdin=build_script(t / "w").encode())

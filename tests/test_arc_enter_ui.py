@@ -4,6 +4,8 @@
 AE1 a zip-based file (.docx / .jar / .apk) opens as a folder
 AE2 .tar.xz / .7z / .rar / .zst / a plain .gz: a status message ("cannot be browsed yet"), no viewer
 AE3 a .zip / .tar.gz that is damaged: "Not a readable archive", no viewer;  F3 still shows the raw bytes
+AE4 the same by a mouse double click: an archive opens as a folder (not a hex dump), a folder inside it and ".." work, an unsupported
+    format and a damaged archive show their message
 """
 
 import gzip
@@ -98,10 +100,44 @@ def test_damaged_says_so_and_f3_still_views():
     print("[PASS] AE3. a damaged archive: 'Not a readable archive' on Enter, the raw bytes on F3")
 
 
+def double_click(sess, row):
+    """Two left clicks within the double-click time on screen row `row` of the left pane (row 0 = title bar)."""
+    for _ in range(2):
+        sess.send_mouse(0, 10, row, "M", wait=0.03)
+        sess.send_mouse(0, 10, row, "m", wait=0.03)
+    sess.drain(0.4)
+
+
+def test_double_click():
+    z = zip_bytes([Expect("readme.txt", data=b"hi"), Expect("docs/", "dir"), Expect("docs/inner.txt", data=b"inner")])
+    sess = session({"a.zip": z, "b.7z": b"\x00opaque" * 100, "c.zip": b"PK\x03\x04 broken" * 50})
+    try:
+        # rows: 0 header, 1 pane title, 2 column titles, 3 divider, 4 "..", 5 a.zip, 6 b.7z, 7 c.zip
+        double_click(sess, 5)
+        wait_for(sess, "/left/a.zip ")                       # the pane title is the archive: inside it (the raw bytes of a hex dump also mention readme.txt)
+        assert "« .." in sess.vt.full_text() and "docs" in sess.vt.full_text(), "a double click on a.zip must show its members, not a hex dump"
+        double_click(sess, 5)                                # the folder docs (sorted first)
+        wait_for(sess, "inner.txt")
+        double_click(sess, 4)                                # ".." up to the archive root
+        wait_for(sess, "readme.txt")
+        double_click(sess, 4)                                # ".." out of the archive
+        wait_for(sess, "b.7z")
+        assert "/left/a.zip " not in sess.vt.full_text(), "'..' at the archive root must leave the archive"
+        double_click(sess, 6)
+        wait_for(sess, "cannot be browsed yet")
+        double_click(sess, 7)
+        wait_for(sess, "Not a readable archive")
+        assert "Name" in sess.vt.full_text()
+    finally:
+        kill(sess)
+    print("[PASS] AE4. mouse double click: an archive opens as a folder, folders and '..' work, unsupported / damaged archives say why")
+
+
 def main():
     test_zip_based_opens_as_folder()
     test_unsupported_formats_explain()
     test_damaged_says_so_and_f3_still_views()
+    test_double_click()
     print("ALL ARCHIVE ENTER UI TESTS PASSED.")
 
 

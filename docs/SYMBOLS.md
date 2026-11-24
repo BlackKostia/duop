@@ -857,7 +857,7 @@
   - `App_dtor` — `void App_dtor(App *app)`
 - **`src/app/app_arc.c`**
   - `arc_nav_up` — `int arc_nav_up(FilePane *fp)`
-  - `arc_handle_enter` — `int arc_handle_enter(App *app)`
+  - `arc_open_entry` — `int arc_open_entry(App *app, FilePane *ap)`
   - `arc_extract_selected` — `int arc_extract_selected(FilePane *fp, char *out_tmp_path)`
 - **`src/app/app_arc_cmds.c`**
   - `App_cmd_unpack` — `void App_cmd_unpack(App *app)`

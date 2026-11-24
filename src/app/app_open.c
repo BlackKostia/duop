@@ -56,6 +56,7 @@ void App_open_selected_entry(App *app, FilePane *pane)
 {
     FileEntry *fe = FilePane_get_selected_entry(pane);
     if (!fe) return;
+    if (arc_open_entry(app, pane)) return;                         /* an archive, a folder of one, ".." inside one: not a file to view */
 
     char full[PATH_MAX];
     DirModel *m = (DirModel *)(uintptr_t)pane->model;

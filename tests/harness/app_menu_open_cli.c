@@ -368,9 +368,28 @@ static void handle_menu(char *p)
     }
 }
 
+static int g_arc_open_rc;
+/* the archive layer's answer to "enter this entry as an archive folder" (the frozen asm never asks: the default 0 keeps the differential exact) */
+int arc_open_entry(App *app, FilePane *pane);
+int arc_open_entry(App *app, FilePane *pane) { (void)app; (void)pane; return g_arc_open_rc; }
+
 static void handle_open(char *p)
 {
     int sub = (int)sc_tok_i64(&p);
+    if (sub == 2) {
+        /* O 2 <arc_open_rc>: a plain file under the cursor (C only): when the archive layer handles it no viewer may open */
+        init_state();
+        g_has_fe = 1;
+        g_fe.flags = 0;
+        g_lm.virtual_mode = 0;
+        (void)str_copy(g_fe_name, "a.zip", sizeof g_fe_name);
+        g_open_rule = nullptr;
+        g_arc_open_rc = (int)sc_tok_i64(&p);
+        App_open_selected_entry(&g_app, &g_lp);
+        sc_put("OA dlg="); sc_num(g_app.active_dialog != 0); sc_nl();
+        g_arc_open_rc = 0;
+        return;
+    }
     if (sub == 0) {
         /* O 0 <has_fe> <flags> <vmode> <vfs_par> <vfs_load_rc> <nav_rc> <has_arc_ctx> <has_rule> <name> */
         init_state();
