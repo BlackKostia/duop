@@ -152,13 +152,17 @@
 
 ## Рівень 4 (`v2.7+`) — Невиконані завдання та ідеї розвитку (Product Roadmap)
 
-### 4.1 Повноцінна підтримка архівів (`v2.7.1` → `v2.9.x`, план у [ARCHIVE_TOOLS_PLAN.md](docs/ARCHIVE_TOOLS_PLAN.md))
+### 4.1 Повноцінна підтримка архівів (`v2.7.1` → `v2.15.x`, плани: [ARCHIVE_TOOLS_PLAN.md](docs/ARCHIVE_TOOLS_PLAN.md) — фази 0–2, [ARCHIVE_ROADMAP_2026-11-24.md](docs/ARCHIVE_ROADMAP_2026-11-24.md) — далі)
 - [x] **Фаза 0 (`v2.7.1`)**: `F5`/`F6`/`F8` в архіві показують «Archive is read-only» замість зламаного діалогу; регресійний тест `tests/test_arc_readonly.py`.
 - [x] **Фаза 1 (`v2.8.0`) — масштаб і потоковість**: `mmap`-вхід (`arc_source.c`), динамічний відсортований індекс (`arc_index.c`), потоковий `DEFLATE`/Deflate64 (`inflate_stream.c`) і gzip з CRC (`gzip_dec.c`), повний `tar` (ustar prefix, GNU `L/K`, PAX, base-256, `arc_tar.c`) і `zip` (UTF-8/CP437, ZIP64, префікс SFX, перекриття, `arc_zip.c`), потокове розпакування з перевіркою CRC (`arc_extract.c`); ліміти 4 МіБ / 1024 / 8 МіБ / 64 МіБ зняті.
 - [x] **Фаза 2 (`v2.9.0`) — розпакування і тест**: `F5` в архіві, `Alt+F9` (розпакувати) і `Alt+Shift+F9` (перевірити) на `arc_unpack*.c`/`arc_path.c`/`arc_task.c` (`TASK_OP_UNPACK`/`TASK_OP_ARCTEST` у `TaskWorker`): `openat(O_NOFOLLOW)`-обхід, Zip-Slip/symlink/hardlink-захист, `.duop-part` + CRC + `rename`, конфлікти, `smart unpack`, ліміт місця і захист від бомби, прогрес і скасування.
-- [ ] **Фаза 3 (`v2.8.2`) — пакування**: `Alt+F5` → `.tar`, `.tar.gz`, `.zip`/ZIP64 (`deflate.c`, `tar_write.c`, `zip_write.c`, `archive_pack.c`), атомарний вивід, перевірка після пакування.
-- [ ] **Фаза 4 (`v2.9.0`) — кодеки**: `bzip2`, `xz`/LZMA2, `zstd` (`.tar.bz2/.xz/.zst`, окремі `.gz/.bz2/.xz/.zst`, zip-методи 9/12/14/93/95).
-- [ ] **Фаза 5 (`v2.9.x`)**: міграція пакетного менеджера на новий API, вкладені архіви, перегляд записів у `F9`, бенчмарк.
+- [ ] **Фаза 3 (`v2.9.x`) — фундамент**: асинхронне відкриття стиснутого tar (worker + прогрес), визначення формату за магією, одиночний `.gz`, прев'ю й інфо-рядок архіву, конфіг-ключі лімітів.
+- [ ] **Фаза 4 (`v2.10.x`) — декодери**: `zstd` → `xz`/LZMA2 → `bzip2` (`.tar.zst/.xz/.bz2`, одиночні `.zst/.xz/.bz2/.lzma`, zip-методи 12/14/93/95).
+- [ ] **Фаза 5 (`v2.11.x`) — контейнери**: `.deb`/`.ar`, `.rpm`/`.cpio`, OCI-шари, `.7z` (читання), `.iso`, вкладені архіви.
+- [ ] **Фаза 6 (`v2.12.x`) — пакування**: `Alt+F5` → `.tar`, `.tar.gz`, `.zip`/ZIP64 (`deflate.c`, `tar_write.c`, `zip_write.c`, `archive_pack.c`), детермінований вивід, перевірка після пакування; далі запис `zstd`.
+- [ ] **Фаза 7 (`v2.13.x`)**: додавання/видалення/перейменування записів в архіві (через temp + `rename`).
+- [ ] **Фаза 8 (`v2.14.x`)**: шифрування (ZipCrypto — лише читання, WinZip AES-256, 7z AES).
+- [ ] **Фаза 9 (`v2.15.x`)**: кеш індексу й довільний доступ, SIMD CRC, паралелізм, headless CLI `duop x|a|t|l`, міграція `pkg_archive.c`, бенчмарк. Повний план — [ARCHIVE_ROADMAP_2026-11-24.md](docs/ARCHIVE_ROADMAP_2026-11-24.md).
 
 ### 4.2 Щоденні DevOps / SRE / Dev сценарії (ідеї розвитку — не реалізовано)
 - [ ] **Віддалена панель `sftp://` через `pkg_vfs`** (`virtual_mode = 3` у [pkg_vfs_pane.c](src/fs/pkg_vfs_pane.c)): навігація та копіювання файлів по SSH без вшивання TLS/SSH-бібліотек у статичний бінарник.
