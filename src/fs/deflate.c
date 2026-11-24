@@ -230,6 +230,20 @@ int deflate_write(Deflate *d, const uint8_t *buf, size_t len)
     return 0;
 }
 
+void deflate_reset(Deflate *d)
+{
+    d->err = 0;
+    d->strstart = d->lookahead = d->nsym = 0;
+    d->block_start = 0;
+    d->match_start = d->prev_match = 0;
+    d->match_length = d->prev_length = DEF_MIN_MATCH - 1;
+    d->match_available = false;
+    d->outn = 0;
+    d->bitbuf = 0;
+    d->bitcnt = 0;
+    if (d->head) __builtin_memset(d->head, 0, DEF_HASH_SIZE * sizeof(uint16_t));
+}
+
 int deflate_finish(Deflate *d)
 {
     if (d->err) return d->err;

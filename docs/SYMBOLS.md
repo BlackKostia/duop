@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 692
+- **Exported `.global` Symbols**: 708
 
 ## Structs (`include/*.inc`)
 
@@ -400,6 +400,12 @@
   - `arc_idx_find_raw` — `const ArcItem *arc_idx_find_raw(const ArcIndex *x, const char *raw, size_t len)`
   - `arc_idx_find` — `const ArcItem *arc_idx_find(const ArcIndex *x, const char *path)`
   - `arc_idx_list` — `int arc_idx_list(const ArcIndex *x, const char *prefix, ArcListFn fn, void *ctx)`
+- **`src/fs/arc_pack.c`**
+  - `arc_pack_format` — `int arc_pack_format(const char *name)`
+  - `arc_pack` — `intptr_t arc_pack(const char *dst, const char *names, uint32_t count, const ArcPackOpts *o, ArcPackReport *r)`
+- **`src/fs/arc_pack_out.c`**
+  - `pack_out_open` — `int pack_out_open(PackOut *o, const char *dst, uint32_t format, uint32_t level)`
+  - `pack_out_close` — `int pack_out_close(PackOut *o, bool commit)`
 - **`src/fs/arc_path.c`**
   - `arc_dest_parent` — `intptr_t arc_dest_parent(int root, const char *rel, bool create, const char **leaf)`
   - `arc_link_safe` — `bool arc_link_safe(const char *rel, const char *target)`
@@ -439,6 +445,7 @@
   - `deflate_new` — `Deflate *deflate_new(int level, const CodecSink *sink)`
   - `deflate_free` — `void deflate_free(Deflate *d)`
   - `deflate_write` — `int deflate_write(Deflate *d, const uint8_t *buf, size_t len)`
+  - `deflate_reset` — `void deflate_reset(Deflate *d)`
   - `deflate_finish` — `int deflate_finish(Deflate *d)`
 - **`src/fs/deflate_huff.c`**
   - `deflate_tables_init` — `void deflate_tables_init(Deflate *d)`
@@ -672,6 +679,12 @@
   - `fs_preview_stop` — `void fs_preview_stop(void)`
   - `fs_preview_request` — `int fs_preview_request(const char *path, uint32_t dims, uint32_t mode, uint32_t bg)`
   - `fs_preview_receive` — `int fs_preview_receive(void *buf, size_t cap, uint32_t *out_seq, size_t *out_len, size_t *out_tlen)`
+- **`src/fs/tar_write.c`**
+  - `tar_begin` — `int tar_begin(TarWriter *t, const PackEntry *e)`
+  - `tar_data` — `int tar_data(TarWriter *t, const uint8_t *p, size_t n)`
+  - `tar_end` — `int tar_end(TarWriter *t)`
+  - `tar_finish` — `int tar_finish(TarWriter *t)`
+  - `arc_pack_tar_header_test` — `size_t arc_pack_tar_header_test(uint8_t *out, size_t cap, uint64_t size, uint32_t uid, int64_t mtime, char type, uint32_t mode, const char *name, const char *link)`
 - **`src/fs/task.c`**
   - `fs_progress_begin` — `void fs_progress_begin(const char *path)`
   - `fs_progress_bytes` — `void fs_progress_bytes(uint64_t n)`
@@ -705,6 +718,13 @@
   - `undo_pop_and_apply` — `int undo_pop_and_apply(void)`
 - **`src/fs/xz_dec.c`**
   - `xz_decode` — `intptr_t xz_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
+- **`src/fs/zip_write.c`**
+  - `zip_new` — `ZipWriter *zip_new(const CodecSink *out, int level)`
+  - `zip_free` — `void zip_free(ZipWriter *z)`
+  - `zip_begin` — `int zip_begin(ZipWriter *z, const PackEntry *e)`
+  - `zip_data` — `int zip_data(ZipWriter *z, const uint8_t *p, size_t n)`
+  - `zip_end` — `int zip_end(ZipWriter *z)`
+  - `zip_finish` — `int zip_finish(ZipWriter *z)`
 - **`src/fs/zstd_dec.c`**
   - `zstd_decode` — `intptr_t zstd_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/zstd_fse.c`**

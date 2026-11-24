@@ -11,4 +11,5 @@ typedef struct Deflate Deflate;
 Deflate *deflate_new(int level, const CodecSink *sink);                 /* NULL when out of memory; the sink gets the compressed bytes */
 int deflate_write(Deflate *d, const uint8_t *buf, size_t len);          /* 0, or the (negative) error of the sink */
 int deflate_finish(Deflate *d);                                         /* the last block; the stream is complete after it */
+void deflate_reset(Deflate *d);                                         /* ready for a new stream (a zip with many entries reuses one compressor) */
 void deflate_free(Deflate *d);
