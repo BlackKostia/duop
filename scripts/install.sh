@@ -2,7 +2,7 @@
 # Duop installer: downloads the prebuilt static binary of a GitHub release (verified against SHA256SUMS),
 # or builds from source when no release asset is available (DUOP_FROM_SOURCE=1 forces the source build).
 #   curl -fsSL https://raw.githubusercontent.com/BlackKostia/duop/main/scripts/install.sh | bash
-# Environment: DUOP_REPO (owner/name), DUOP_VERSION (e.g. 2.7.0, default: latest), PREFIX (default /usr/local).
+# Environment: DUOP_REPO (owner/name), DUOP_VERSION (e.g. 2.11.0, default: latest), PREFIX (default /usr/local).
 set -euo pipefail
 REPO="${DUOP_REPO:-BlackKostia/duop}"
 PREFIX="${PREFIX:-/usr/local}"

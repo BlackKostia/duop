@@ -1,9 +1,9 @@
 class Duop < Formula
-  desc "Ultra-fast zero-libc dual-pane TUI file manager (static ~190 KB ELF)"
+  desc "Ultra-fast zero-libc dual-pane TUI file manager (static ~250 KB ELF)"
   homepage "https://github.com/BlackKostia/duop"
-  url "https://github.com/BlackKostia/duop/archive/refs/tags/v2.7.0.tar.gz"
-  # Fill in after the v2.7.0 tag is published:
-  #   curl -sL https://github.com/BlackKostia/duop/archive/refs/tags/v2.7.0.tar.gz | sha256sum
+  url "https://github.com/BlackKostia/duop/archive/refs/tags/v2.11.0.tar.gz"
+  # Fill in after the v2.11.0 tag is published:
+  #   curl -sL https://github.com/BlackKostia/duop/archive/refs/tags/v2.11.0.tar.gz | sha256sum
   # sha256 "<sha256>"
   license "MIT"
   head "https://github.com/BlackKostia/duop.git", branch: "main"

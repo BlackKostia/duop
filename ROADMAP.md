@@ -6,9 +6,9 @@
 
 ---
 
-## Поточна база (`v1.0` — `v2.6.91` — реалізовано)
+## Поточна база (`v1.0` — `v2.11.0` — реалізовано)
 
-- **Кодова база**: `v1.0` починалася з `13 356` рядків і ~50 КБ (`text=45445, data=0, bss=680`); актуальний `v2.6.91` (171 C23-модуль + 28 асемблерних PAL-модулів, **0 не-PAL `.s` файлів**) із декодерами зображень (JPEG/PNG/GIF/BMP/PNM/TGA/QOI), Kitty/Sixel, Package Manager, `io_uring` та Archive VFS (ZIP64) — stripped static ELF **~183 КБ на `x86_64`** (`text=182683, data=0`) та **~210 КБ на `aarch64`** (`text=210213, data=0`, повний static ELF64 без `libc`).
+- **Кодова база**: `v1.0` починалася з `13 356` рядків і ~50 КБ (`text=45445, data=0, bss=680`); актуальний `v2.11.0` (201 C23-модуль + 28 асемблерних PAL-модулів, **0 не-PAL `.s` файлів**) із декодерами зображень (JPEG/PNG/GIF/BMP/PNM/TGA/QOI), Kitty/Sixel, Package Manager, `io_uring` та повним архівним шаром (перегляд/розпакування/перевірка/створення: tar, zip/ZIP64, gzip, xz, bzip2, zstd) — stripped static ELF **255 032 Б (~249 КіБ) на `x86_64`** (`text=248080, data=0`) та **292 312 Б (~285 КіБ) на `aarch64`** (повний static ELF64 без `libc`).
 - **ООП-рантайм** ([duop_oop.h](include/duop_oop.h), [duop_ui.h](include/duop_ui.h), [oop_rt.c](src/core/oop_rt.c), [classes.inc](include/classes.inc)): `Object`, `ScreenBuffer`, `DirModel`, `App`, `Widget` → `HeaderBar`, `FunctionBar`, `StatusBar`, `FilePane`, `PreviewPane`, `Dialog` → `ConfirmDialog`, `InputDialog`, `ViewerDialog`, `HelpDialog`, `ProgressDialog`, `ConflictDialog`, `ChmodDialog`, `InfoDialog`, `ViewAsDialog`, `BookmarkDialog`, `SearchDialog`, `FuzzyDialog`, `UserMenuDialog`, `BulkRenameDialog`, `PkgDialog`.
 - **Графіка та ввід**: 24-біт TrueColor diff-рендер ([screen.c](src/tui/screen.c)), 3 теми ([theme.c](src/tui/theme.c)), повний декодер клавіатури (включно з `Alt + UTF-8`) і миші `SGR 1006` ([input.c](src/tui/input.c)).
 - **Двомовність (UA / EN)** ([i18n_en.lang](src/tui/i18n_en.lang)): `--lang ua|en`, автовизначення `LC_ALL`/`LC_MESSAGES`/`LANG`, миттєве перемикання `Alt+L` (`Alt+д`) або кнопкою у шапці, динамічні UTF-8 хіт-зони (`utf8_display_width`).
@@ -139,13 +139,13 @@
 
 1. **Англомовний `README.md` + переклад та візуальні матеріали ✅**: головний [README.md](README.md) англійською мовою, окремий [README.uk.md](README.uk.md), детермінований генератор SVG-скриншотів [tools/screenshot_svg.py](tools/screenshot_svg.py) (`docs/media/*.svg`) та порівняльна таблиця з конкурентами. ✅
 2. **Публічні бенчмарки у `README` ✅**:
-   - розмір stripped ELF-бінарника (`191 528 Б` / `187 КіБ` на `x86_64`, `214 128 Б` / `209 КіБ` на `aarch64`, `.data=0`), час холодного старту (`2.6 ms` через `hyperfine -N`), швидкість відкриття `100 000` файлів (`112.7 ms`, [scripts/bench.sh](scripts/bench.sh)) та `4 798 976` файлів (`26.4 ms`, `15.4 MiB RSS`, [docs/BENCHMARK_20M_2026-11-17.md](docs/BENCHMARK_20M_2026-11-17.md)). ✅
+   - (виміряно на `v2.7.0`; актуальні числа `v2.11.0`: `255 032 Б` / `249 КіБ` на `x86_64`, `292 312 Б` / `285 КіБ` на `aarch64`, холодний старт `1.3 ms`) розмір stripped ELF-бінарника (`191 528 Б` / `187 КіБ` на `x86_64`, `214 128 Б` / `209 КіБ` на `aarch64`, `.data=0`), час холодного старту (`2.6 ms` через `hyperfine -N`), швидкість відкриття `100 000` файлів (`112.7 ms`, [scripts/bench.sh](scripts/bench.sh)) та `4 798 976` файлів (`26.4 ms`, `15.4 MiB RSS`, [docs/BENCHMARK_20M_2026-11-17.md](docs/BENCHMARK_20M_2026-11-17.md)). ✅
 3. **CI та дистрибуція ✅**:
    - GitHub Actions CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) із автоматичним `release`-job та генератором релізних артефактів [scripts/make_dist.sh](scripts/make_dist.sh) (`x86_64` + `aarch64` + `SHA256SUMS`); ✅
    - пакети для `AUR` ([packaging/aur/PKGBUILD](packaging/aur/PKGBUILD)), `.deb` ([packaging/deb/](packaging/deb/build-deb.sh)), `Nix` ([flake.nix](flake.nix)), `Homebrew` ([Formula/duop.rb](Formula/duop.rb)) та однорядковий [scripts/install.sh](scripts/install.sh) із перевіркою `SHA256SUMS`. ✅
 4. **Порт на AArch64 (compile-time PAL ✅, повний runtime-бінарник ✅)**:
    - повний compile-time PAL-бекенд у [include/os/linux/aarch64/pal_target.inc](include/os/linux/aarch64/pal_target.inc) та [src/os/linux/aarch64/](src/os/linux/aarch64/pal_os.s) разом зі 100% портативними C23-шарами (`v2.6.90+`) збирають повний статичний ELF64-бінарник `duop` для `linux/aarch64`, верифікований під `qemu-aarch64` та на нативному ARM64 runner у CI. ✅
-5. **Підготовка релізу `v2.7.0` та Go-to-Market матеріали ✅ (публікація тегу й анонсів ⏳)**:
+5. **Підготовка релізу `v2.7.0` та Go-to-Market матеріали ✅ (тег `v2.7.0` опубліковано; анонси ⏳)**:
    - продуктова стратегія та SWOT-аналіз у [docs/PRODUCT_STRATEGY_2026-11-20.md](docs/PRODUCT_STRATEGY_2026-11-20.md), інструкція для контриб'юторів [CONTRIBUTING.md](CONTRIBUTING.md), шаблони Issues/PR у `.github/` та готові тексти анонсів (Hacker News, Reddit, Lobsters, DOU) у `docs/launch/`.
 
 ---
@@ -158,7 +158,7 @@
 - [x] **Фаза 2 (`v2.9.0`) — розпакування і тест**: `F5` в архіві, `Alt+F9` (розпакувати) і `Alt+Shift+F9` (перевірити) на `arc_unpack*.c`/`arc_path.c`/`arc_task.c` (`TASK_OP_UNPACK`/`TASK_OP_ARCTEST` у `TaskWorker`): `openat(O_NOFOLLOW)`-обхід, Zip-Slip/symlink/hardlink-захист, `.duop-part` + CRC + `rename`, конфлікти, `smart unpack`, ліміт місця і захист від бомби, прогрес і скасування.
 - [ ] **Фаза 3 (`v2.9.x`) — фундамент**: [x] визначення формату за магією (`arc_detect.c`) і одиночний `.gz` (`v2.9.3`); [ ] асинхронне відкриття стиснутого tar (worker + прогрес), [ ] прев'ю й інфо-рядок архіву, [ ] конфіг-ключі лімітів.
 - [ ] **Фаза 4 (`v2.10.x`) — декодери**: [x] `zstd` (`zstd_dec/fse/huf/seq.c`, XXH64; `.zst`, `.tar.zst`, zip-метод 93; диференційно проти `zstd`, `v2.10.0`); [x] `xz`/LZMA2 (`lzma_dec/lzma2_dec/xz_dec.c`, CRC-64; `.xz`, `.tar.xz`, zip-метод 95; диференційно проти liblzma, `v2.10.1`; BCJ/Delta і LZMA1/zip-метод 14 — далі); [x] `bzip2` (`bzip2_dec.c`; `.tar.bz2`, `.bz2`, zip-метод 12; диференційно проти libbz2, `v2.10.2`); [ ] LZMA1 (`.lzma`, zip-метод 14) і фільтри BCJ/Delta для xz.
-- [ ] **Фаза 5 (`v2.11.x`) — контейнери**: `.deb`/`.ar`, `.rpm`/`.cpio`, OCI-шари, `.7z` (читання), `.iso`, вкладені архіви.
+- [ ] **Фаза 5 (`v2.12.x`) — контейнери**: `.deb`/`.ar`, `.rpm`/`.cpio`, OCI-шари, `.7z` (читання), `.iso`, вкладені архіви.
 - [x] **Фаза 6 (`v2.11.0`) — пакування** (DEFLATE-компресор `v2.10.4`; писачі `tar_write.c`/`zip_write.c`/`arc_pack*.c` `v2.10.5`; `Alt+F5` `v2.11.0`; залишилось: запис `zstd`, виключення за шаблонами, жорсткі посилання в tar, діалог рівня стиснення): `Alt+F5` → `.tar`, `.tar.gz`, `.zip`/ZIP64 (`deflate.c`, `tar_write.c`, `zip_write.c`, `archive_pack.c`), детермінований вивід, перевірка після пакування; далі запис `zstd`.
 - [ ] **Фаза 7 (`v2.13.x`)**: додавання/видалення/перейменування записів в архіві (через temp + `rename`).
 - [ ] **Фаза 8 (`v2.14.x`)**: шифрування (ZipCrypto — лише читання, WinZip AES-256, 7z AES).

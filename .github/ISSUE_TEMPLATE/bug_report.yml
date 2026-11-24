@@ -7,7 +7,7 @@ body:
     attributes:
       label: Duop version & architecture
       description: Output of `duop --version` and `uname -m`
-      placeholder: "Duop v2.7.0 (x86-64 Linux ELF64, zero-libc)"
+      placeholder: "Duop v2.11.0 (x86-64 Linux ELF64, zero-libc)"
     validations:
       required: true
   - type: input

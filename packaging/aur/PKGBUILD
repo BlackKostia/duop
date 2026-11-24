@@ -1,8 +1,8 @@
 # Maintainer: Kostiantyn Nedbailo <ChessPlayerSedoy@gmail.com>
 pkgname=duop
-pkgver=2.7.0
+pkgver=2.11.0
 pkgrel=1
-pkgdesc="Ultra-fast zero-libc dual-pane TUI file manager (static ~190 KB ELF, C23 + assembly PAL)"
+pkgdesc="Ultra-fast zero-libc dual-pane TUI file manager (static ~250 KB ELF, C23 + assembly PAL)"
 arch=('x86_64' 'aarch64')
 url="https://github.com/BlackKostia/duop"
 license=('MIT')

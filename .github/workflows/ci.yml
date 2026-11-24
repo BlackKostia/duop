@@ -9,6 +9,8 @@ on:
 
 jobs:
   build-and-verify:
+    # the tests run locally before a release (pre-push hook: the full suite + faultlab); the tag push only builds and publishes
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +30,7 @@ jobs:
 
   headless-x86-qemu:
     # Portable C23 layers + PAL on both ISAs; aarch64 runs under qemu-user
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +44,7 @@ jobs:
 
   headless-arm64-native:
     # Native AArch64: no emulation, real kernel ABI
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
@@ -59,9 +63,9 @@ jobs:
           ./build_selftest/aarch64/selftest </dev/null
 
   release:
-    # Tag push vX.Y.Z: stripped static binaries + tarballs for x86_64 and aarch64, SHA256SUMS, GitHub Release
+    # Tag push vX.Y.Z: stripped static binaries + tarballs for x86_64 and aarch64, SHA256SUMS, GitHub Release - no tests here:
+    # they were run before the tag was pushed (.githooks/pre-push), and every branch push / pull request still runs the jobs above
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [ build-and-verify, headless-x86-qemu, headless-arm64-native ]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

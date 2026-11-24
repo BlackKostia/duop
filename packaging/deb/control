@@ -1,5 +1,5 @@
 Package: duop
-Version: 2.7.0
+Version: 2.11.0
 Section: utils
 Priority: optional
 Architecture: amd64
@@ -7,8 +7,8 @@ Maintainer: Kostiantyn Nedbailo <ChessPlayerSedoy@gmail.com>
 Homepage: https://github.com/BlackKostia/duop
 Description: Ultra-fast zero-libc dual-pane TUI file manager
  Duop is a dual-pane terminal file manager shipped as a single static
- ~190 KB ELF with no libc and no third-party libraries (freestanding C23
+ ~250 KB ELF with no libc and no third-party libraries (freestanding C23
  over an assembly platform layer). TrueColor UI, background copy/move with
  conflict resolution, io_uring batch stat, fuzzy finder, command palette,
- archive VFS, git status, syntax highlighting, image preview (Kitty/Sixel),
+ archive VFS (browse, unpack, pack), git status, syntax highlighting, image preview (Kitty/Sixel),
  hex editor, ELF inspector and an embedded PTY terminal.
