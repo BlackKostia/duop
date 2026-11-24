@@ -2,8 +2,9 @@
  *
  * tar members are copied in place; zip members are stored or inflated (inflate_stream: 64 KiB window, so a member of any size costs
  * the same RAM) with the CRC-32 and the length compared against the central directory. A failed check is -EBADMSG and the caller
- * discards what was written. Methods other than 0 / 8 / 9 / 93 / 95 and encrypted members are refused, never guessed. */
+ * discards what was written. Methods other than 0 / 8 / 9 / 12 / 93 / 95 and encrypted members are refused, never guessed. */
 #include "duop_arcvfs.h"
+#include "duop_bzip2.h"
 #include "duop_hash.h"
 #include "duop_inflate.h"
 #include "duop_pal.h"
@@ -95,6 +96,9 @@ intptr_t arc_extract_to(const ArcSource *s, const ArcItem *it, int fd, ArcXfer *
     } else if (it->method == 93) {                                            /* Zstandard */
         CodecResult res;
         r = zstd_decode(p, comp, it->size, &sink, &res);
+    } else if (it->method == 12) {                                            /* bzip2 */
+        CodecResult res;
+        r = bzip2_decode(p, comp, it->size, &sink, &res);
     } else if (it->method == 95) {                                            /* xz */
         CodecResult res;
         r = xz_decode(p, comp, it->size, &sink, &res);

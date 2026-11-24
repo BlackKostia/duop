@@ -4,7 +4,7 @@ ArcIndex, streaming extraction; docs/ARCHIVE_TOOLS_PLAN.md, phase 1) - no limit 
 
 AV1 every fixture archive (tar PAX / GNU / ustar / base-256, tar.gz, tgz, zip stored / deflate / ZIP64 / CP437 / SFX / comment, links, empty):
     each folder (walked by Enter and ..) lists exactly the model's children and every regular file extracts to its exact bytes (CRC-32)
-AV2 bzip2 / lzma zip members list but do not extract (-EOPNOTSUPP); an encrypted member lists and is refused; overlapping or ".." members
+AV2 lzma (method 14) zip members list but do not extract (-EOPNOTSUPP); an encrypted member lists and is refused; overlapping or ".." members
     never appear
 AV3 scale: a 12 MiB zip, a tar.gz inflating to 40 MiB, 120000 tar members, 70000 zip members, an 80 MiB deflated entry (all above the
     old 4 MiB / 1024 / 8 MiB / 64 MiB limits): entered, listed, extracted
@@ -34,7 +34,7 @@ from test_c_arc_index import normalize
 
 ROOT = H.ROOT
 VFS = ["src/fs/archive_vfs.c", "src/fs/arc_source.c", "src/fs/arc_extract.c"]
-NEW = ["src/fs/xz_dec.c", "src/fs/lzma2_dec.c", "src/fs/lzma_dec.c", "src/core/hash_crc64.c", "src/fs/zstd_dec.c", "src/fs/zstd_fse.c", "src/fs/zstd_huf.c", "src/fs/zstd_seq.c", "src/core/hash_xxh.c", "src/fs/arc_detect.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
+NEW = ["src/fs/bzip2_dec.c", "src/fs/xz_dec.c", "src/fs/lzma2_dec.c", "src/fs/lzma_dec.c", "src/core/hash_crc64.c", "src/fs/zstd_dec.c", "src/fs/zstd_fse.c", "src/fs/zstd_huf.c", "src/fs/zstd_seq.c", "src/core/hash_xxh.c", "src/fs/arc_detect.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
 MODS = ["src/fs/dir_model.c", "src/fs/dir_model_filter.c", "src/fs/dir_model_load.c", "src/fs/dir_model_stream.c", "src/fs/dir_model_stat.c",
         "src/fs/dir_model_select.c", "src/fs/dir_sort.c", "src/fs/dir_sort_radix.c", "src/fs/dir_cache.c", "src/fs/dir_search.c",
         "src/fs/dir_search_match.c", "src/fs/inflate.c", "src/fs/file_ops_delete.c", "src/fs/file_ops.c", "src/fs/file_ops_copy.c",
@@ -179,13 +179,13 @@ def test_special(exe: Path, work: Path) -> None:
     assert out[1].startswith("E r=1") and "readme.txt:0" in out[1], out[1][:160]            # encrypted: listed ...
     assert re.match(r"X r=-\d+", out[2]), out[2]                                           # ... and refused (-EACCES)
     assert out[2].startswith("X r=-13"), out[2]
-    assert out[4].startswith("E r=1") and "readme.txt:0" in out[5] and out[6].startswith(f"X r={EOPNOTSUPP}"), (out[5][:100], out[6])
+    assert out[4].startswith("E r=1") and "readme.txt:0" in out[5] and out[6].startswith("X r=0 len=14 "), (out[5][:100], out[6])      # bzip2 (12) is read since v2.10.2
     assert out[9].startswith(f"X r={EOPNOTSUPP}"), out[9]
     assert listing(out[12])[1] == {}, f"overlapping members must not be listed: {out[12]}"
     kids = listing(out[16])[1]
     assert kids == {b"ok.txt": ("f", 2)}, f"'..' members must stay hidden: {kids}"
     assert out[17] == f"X r=0 len=2 crc={zlib.crc32(b'ok')}", out[17]
-    print("[PASS] AV2. bzip2 / lzma members list but are refused (-EOPNOTSUPP), encrypted refused, overlapping and '..' members never listed")
+    print("[PASS] AV2. bzip2 members extract, lzma members list but are refused (-EOPNOTSUPP), encrypted refused, overlapping and '..' members never listed")
 
 
 def make_big(work: Path) -> dict[str, tuple[Path, list[Expect]]]:
@@ -295,9 +295,9 @@ def test_other_names(exe: Path, work: Path) -> None:
     got = {n: int(out[1 + 2 * i].split()[1][2:]) for i, n in enumerate(names)}
     for n in ("a.docx", "b.jar", "c.apk", "d.whl", "e.epub", "f.xlsx", "g.odt", "h.pptx", "i.cbz", "j.nupkg", "w.tar.gz"):
         assert got[n] == 1, (n, got[n])
-    for n in ("l.tar.bz2", "m.7z", "n.rar", "r.bz2", "t.tbz2", "u.lz4"):
+    for n in ("m.7z", "n.rar", "u.lz4"):
         assert got[n] == 6, (n, got[n])
-    for n in ("k.tar.xz", "o.zst", "p.tar.zst", "q.xz", "s.txz"):
+    for n in ("k.tar.xz", "l.tar.bz2", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2"):
         assert got[n] == 4, (n, got[n])           # zstd is read since v2.10.0: opaque bytes are a damaged .zst
     assert got["plain.gz"] == 1, got["plain.gz"]                                  # a plain .gz is a one-member archive since v2.9.3
     assert got["notes.txt"] == 0, got["notes.txt"]

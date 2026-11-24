@@ -166,9 +166,9 @@ MUTANTS = [
     ("first chunk peek", "#define XZ_PEEK (96u << 10)", "#define XZ_PEEK (8u << 10)"),
     ("txz name", 'ends_ci(path, ".txz")', 'ends_ci(path, ".tx")'),
     ("xz name", 'return ends_ci(path, ".xz") ? ARC_XZ : 0;', "return 0;"),
-    ("single member name", 'static const char *const sfx[] = {".gz", ".zst", ".xz", ".tgz", ".tzst", ".txz"};', 'static const char *const sfx[] = {".gz", ".zst", ".tgz", ".tzst", ".txz"};'),
+    ("single member name", 'static const char *const sfx[] = {".gz", ".zst", ".xz", ".bz2", ".tgz", ".tzst", ".txz", ".tbz2", ".tbz"};', 'static const char *const sfx[] = {".gz", ".zst", ".bz2", ".tgz", ".tzst", ".txz", ".tbz2", ".tbz"};'),
     ("xz decoder", "if (type == ARC_TXZ || type == ARC_XZ) return xz_decode;", "if (type == ARC_TXZ) return xz_decode;"),
-    ("empty xz", "&& s->type != ARC_ZST && s->type != ARC_XZ)", "&& s->type != ARC_ZST)"),
+    ("empty xz", "&& s->type != ARC_XZ && s->type != ARC_BZ)", "&& s->type != ARC_BZ)"),
     ("zip method 95", "} else if (it->method == 95) {", "} else if (0) {"),
 ]
 MUT_SRC = ["src/fs/arc_detect.c", "src/fs/arc_source.c", "src/fs/arc_extract.c"]

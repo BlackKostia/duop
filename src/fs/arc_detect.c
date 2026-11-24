@@ -1,12 +1,13 @@
 /* src/fs/arc_detect.c - what an archive file is, decided by its contents (freestanding C23).
  *
- * A file is read for at most one KiB (and, for gzip, zstd and xz, enough input to see the first 512 bytes of what it unpacks to): zip, gzip,
- * zstd and xz by their magic, a tar by a valid header checksum, a gzip / zstd file as a tar.gz / tar.zst when it unpacks to a tar and as a
- * one-member archive otherwise. Formats that are known but not implemented yet (bzip2, 7z, rar, ...) are recognised by magic too,
+ * A file is read for at most one KiB (and, for gzip, zstd, xz and bzip2, enough input to see the first 512 bytes of what it unpacks to): zip, gzip,
+ * zstd, xz and bzip2 by their magic, a tar by a valid header checksum, a gzip / zstd file as a tar.gz / tar.zst when it unpacks to a tar and as a
+ * one-member archive otherwise. Formats that are known but not implemented yet (7z, rar, ...) are recognised by magic too,
  * so that Enter says why instead of opening a hex dump. Where the contents say nothing the extension decides (self-extracting zips, v7 tars,
  * unreadable files), so a file that was an archive by name stays one. Only regular files are opened, without blocking.
  * Text that merely looks like a magic is not mistaken for one: bzip2 needs its block signature, zip its record signature. */
 #include "duop_arcvfs.h"
+#include "duop_bzip2.h"
 #include "duop_inflate.h"
 #include "duop_pal.h"
 #include "duop_string.h"
@@ -16,6 +17,7 @@
 
 #define HEAD_MIN 1024u                      /* enough for every magic below and for a tar header */
 #define GZ_PEEK (96u << 10)                 /* gzip input handed to the decoder: one 64 KiB window of output needs no more */
+#define BZ_PEEK ((1u << 20) + (128u << 10))   /* bzip2 decodes a whole block before it outputs a byte: one of at most 900000 symbols, packed */
 #define XZ_PEEK (96u << 10)                 /* xz: the headers and the first LZMA2 chunk (at most 64 KiB packed) */
 #define ZST_PEEK (144u << 10)               /* zstd: the frame header and the whole first block (at most 128 KiB, stored when it does not compress) */
 
@@ -46,8 +48,7 @@ static bool known_unsupported(const uint8_t *h, size_t n)
     };
     for (size_t i = 0; i < sizeof tab / sizeof tab[0]; i++)
         if (starts(h, n, tab[i].m, tab[i].len)) return true;
-    static const uint8_t bz[] = {0x31, 0x41, 0x59, 0x26, 0x53, 0x59};
-    return n >= 10 && h[0] == 'B' && h[1] == 'Z' && h[2] == 'h' && h[3] >= '1' && h[3] <= '9' && !__builtin_memcmp(h + 4, bz, sizeof bz);
+    return false;
 }
 
 static bool all_zero(const uint8_t *p, size_t n)
@@ -86,6 +87,9 @@ static int classify(int fd, const uint8_t *h, size_t n, int by_ext)
     if (starts(h, n, pk34, 4) || starts(h, n, pk56, 4)) return ARC_ZIP;
     if (n >= 3 && h[0] == 0x1F && h[1] == 0x8B && h[2] == 8) return classify_packed(fd, h, n, GZ_PEEK, gzip_decode, ARC_TGZ, ARC_GZ, by_ext);
     static const uint8_t xz_magic[] = {0xFD, '7', 'z', 'X', 'Z', 0};
+    static const uint8_t bz_block[] = {0x31, 0x41, 0x59, 0x26, 0x53, 0x59}, bz_end[] = {0x17, 0x72, 0x45, 0x38, 0x50, 0x90};
+    if (n >= 10 && h[0] == 'B' && h[1] == 'Z' && h[2] == 'h' && h[3] >= '1' && h[3] <= '9' && (starts(h + 4, n - 4, bz_block, 6) || starts(h + 4, n - 4, bz_end, 6)))
+        return classify_packed(fd, h, n, BZ_PEEK, bzip2_decode, ARC_TBZ, ARC_BZ, by_ext);                  /* a block, or the end of an empty stream */
     if (starts(h, n, xz_magic, 6)) return classify_packed(fd, h, n, XZ_PEEK, xz_decode, ARC_TXZ, ARC_XZ, by_ext);
     if (n >= 4 && ((h[0] == 0x28 && h[1] == 0xB5 && h[2] == 0x2F && h[3] == 0xFD) || ((h[0] & 0xF0) == 0x50 && h[1] == 0x2A && h[2] == 0x4D && h[3] == 0x18)))
         return classify_packed(fd, h, n, ZST_PEEK, zstd_decode, ARC_TZST, ARC_ZST, by_ext);       /* a frame, or a skippable frame first */
@@ -107,6 +111,8 @@ static int ext_type(const char *path)
     if (t) return t;
     if (ends_ci(path, ".tar.zst") || ends_ci(path, ".tzst")) return ARC_TZST;
     if (ends_ci(path, ".tar.xz") || ends_ci(path, ".txz")) return ARC_TXZ;
+    if (ends_ci(path, ".tar.bz2") || ends_ci(path, ".tbz2") || ends_ci(path, ".tbz")) return ARC_TBZ;
+    if (ends_ci(path, ".bz2")) return ARC_BZ;
     if (ends_ci(path, ".zst")) return ARC_ZST;
     return ends_ci(path, ".xz") ? ARC_XZ : 0;
 }

@@ -159,11 +159,11 @@ MUTANTS = [
     ("skippable first", "((h[0] & 0xF0) == 0x50", "((h[0] & 0xF0) == 0x60"),
     ("first block peek", "#define ZST_PEEK (144u << 10)", "#define ZST_PEEK (64u << 10)"),
     ("tzst name", 'ends_ci(path, ".tzst")', 'ends_ci(path, ".tzs")'),
-    ("zst name", 'ends_ci(path, ".zst") ? ARC_ZST : 0', "0"),
+    ("zst name", 'if (ends_ci(path, ".zst")) return ARC_ZST;', ""),
     ("zero block of tar.zst", "(by_ext == tar_type && all_zero(pk.blk, 512))", "false"),
-    ("single member name", 'static const char *const sfx[] = {".gz", ".zst", ".tgz", ".tzst"};', 'static const char *const sfx[] = {".gz", ".tgz", ".tzst"};'),
+    ("single member name", 'static const char *const sfx[] = {".gz", ".zst", ".xz", ".bz2", ".tgz", ".tzst", ".txz", ".tbz2", ".tbz"};', 'static const char *const sfx[] = {".gz", ".xz", ".bz2", ".tgz", ".tzst", ".txz", ".tbz2", ".tbz"};'),
     ("zstd decoder of zst", "if (type == ARC_TZST || type == ARC_ZST) return zstd_decode;", "if (type == ARC_TZST) return zstd_decode;"),
-    ("empty zst", "&& s->type != ARC_GZ && s->type != ARC_ZST)", "&& s->type != ARC_GZ)"),
+    ("empty zst", "&& s->type != ARC_GZ && s->type != ARC_ZST && s->type != ARC_XZ && s->type != ARC_BZ)", "&& s->type != ARC_GZ && s->type != ARC_XZ && s->type != ARC_BZ)"),
     ("zip method 93", "} else if (it->method == 93) {", "} else if (0) {"),
 ]
 MUT_SRC = ["src/fs/arc_detect.c", "src/fs/arc_source.c", "src/fs/arc_extract.c"]

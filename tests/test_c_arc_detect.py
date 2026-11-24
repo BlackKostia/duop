@@ -5,7 +5,7 @@ one-member archive (docs/ARCHIVE_ROADMAP_2026-11-24.md, phase 3).
 DT1 renamed archives: zip / tar / tar.gz under any name, a tar named .zip, a zip named .tar, a tar.gz named .gz are entered as what they are
 DT2 plain .gz: one member named after the file (.gz stripped; "<name>.out" under another name), exact bytes, multi-member gzip, an empty
     payload; the modification time of the gzip header is kept; a bad CRC / truncated stream is not entered (r=4)
-DT3 bzip2 / 7z / rar by magic are "not supported yet" (r=6) under any name; text that only looks similar is a plain file (r=0)
+DT3 7z / rar by magic are "not supported yet" (r=6) under any name; text that only looks similar is a plain file (r=0)
 DT4 a FIFO named like an archive never blocks the open; empty and tiny files are not archives
 DT5 unpacking and testing a plain .gz (smart unpack: no subfolder), a renamed zip, a tar.gz named .gz;  DT6 aarch64 equals x86_64
 DT7 mutation check
@@ -131,15 +131,12 @@ def test_unsupported(exe: Path, work: Path) -> None:
     src = d / "payload.txt"
     src.write_bytes(TEXT)
     made = {}
-    for tool, args, ext in (("bzip2", ["bzip2", "-c"], "x2.dat"),):
-        if shutil.which(tool):
-            made[ext] = subprocess.run([*args, str(src)], capture_output=True, check=True).stdout
     if shutil.which("7z"):
         subprocess.run(["7z", "a", "-bd", "-bso0", str(d / "x4.7z"), str(src)], check=True, capture_output=True)
         made["x4.dat"] = (d / "x4.7z").read_bytes()
         (d / "x4.7z").unlink()
     made["x5.dat"] = b"Rar!\x1a\x07\x01\x00" + bytes(200)
-    made["x6.txt"] = b"BZh91AY&SY" + bytes(100)                                         # magic wins over the extension
+    made["x6.txt"] = b"7z\xbc\xaf\x27\x1c" + bytes(100)                                   # magic wins over the extension
     src.unlink()
     for n, b in made.items():
         (d / n).write_bytes(b)
@@ -151,7 +148,7 @@ def test_unsupported(exe: Path, work: Path) -> None:
     for i, n in enumerate([*made, *plain]):
         want = 6 if n in made else 0
         assert out[2 * i].startswith(f"E r={want} "), (n, out[2 * i][:60])
-    print(f"[PASS] DT3. {len(made)} bzip2 / 7z / rar files are r=6 under any name; {len(plain)} look-alikes are plain files (r=0)")
+    print(f"[PASS] DT3. {len(made)} 7z / rar files are r=6 under any name; {len(plain)} look-alikes are plain files (r=0)")
 
 
 def test_not_blocking(exe: Path, work: Path) -> None:
@@ -227,13 +224,12 @@ MUTANTS = [
     ("full block required", "if (pk.n == 512 && (", "if (("),
     ("zero block of tgz", "(by_ext == tar_type && all_zero(pk.blk, 512))", "false"),
     ("tar by checksum", "if (n >= 512 && h[0] && arc_tar_checksum_ok(h)) return ARC_TAR;", ""),
-    ("bzip2 block magic", "!__builtin_memcmp(h + 4, bz, sizeof bz)", "true"),
     ("rar magic", "{6, {'R', 'a', 'r', '!', 0x1A, 0x07}},", ""),
     ("detect nonblocking", "O_RDONLY | O_CLOEXEC | O_NONBLOCK, 0);   /* a FIFO must not block the pane */", "O_RDONLY | O_CLOEXEC, 0);"),
     ("source nonblocking", "O_RDONLY | O_CLOEXEC | O_NONBLOCK, 0);   /* a FIFO named like an archive must not block */", "O_RDONLY | O_CLOEXEC, 0);"),
     ("gz suffix", "name[n - k] = 0;", "name[n] = 0;"),
     ("gz out suffix", 'if (!cut) (void)str_cat(name, ".out", sizeof name);', ""),
-    ("empty gz", "(!res.produced && s->type != ARC_GZ && s->type != ARC_ZST && s->type != ARC_XZ)", "!res.produced"),
+    ("empty gz", "(!res.produced && s->type != ARC_GZ && s->type != ARC_ZST && s->type != ARC_XZ && s->type != ARC_BZ)", "!res.produced"),
 ]
 MUT_SRC = ["src/fs/arc_detect.c", "src/fs/arc_source.c"]
 

@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 683
+- **Exported `.global` Symbols**: 684
 
 ## Structs (`include/*.inc`)
 
@@ -433,6 +433,8 @@
   - `arc_nav_up_model` — `int arc_nav_up_model(DirModel *m)`
   - `arc_enter_model` — `int arc_enter_model(DirModel *m, const FileEntry *ent)`
   - `arc_extract_entry` — `intptr_t arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path)`
+- **`src/fs/bzip2_dec.c`**
+  - `bzip2_decode` — `intptr_t bzip2_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/dir_cache.c`**
   - `dircache_store` — `int dircache_store(DirModel *m)`
   - `dircache_fetch` — `int dircache_fetch(DirModel *m, const FileStat *st)`
