@@ -14,16 +14,16 @@ enum { ENOSPC_ = 28 };
 
 static int open_index(ArcUnp *u, const char *path, ArcUnpackReport *r)
 {
-    int type = arc_is_archive(path);
-    if (!type) return -EINVAL;
+    int type = arc_detect_file(path);
+    if (type == ARC_UNSUPPORTED) return -EOPNOTSUPP;
+    if (type <= 0) return -EINVAL;
     int rc = arc_source_open_max(&u->src, path, type, TGZ_UNPACK_MAX);
     if (rc) return rc;
     arc_idx_init(&u->idx);
     TryFrame f;
     volatile int pr = -EIO;
     if (os_try_begin(&f) == 0) {                                               /* the archive may be cut short under its mapping */
-        const ArcSource *s = &u->src;
-        pr = type == ARC_ZIP ? arc_zip_parse(&u->idx, s->data, s->len, &u->info) : arc_tar_parse(&u->idx, s->data, s->len, &u->info);
+        pr = arc_parse_source(&u->src, path, &u->idx, &u->info);
         os_try_end(&f);
     }
     if (pr == 0) pr = arc_idx_finish(&u->idx);

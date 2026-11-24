@@ -111,8 +111,7 @@ static int arc_index_file(ArcVfs *v, const char *path, int type)
     TryFrame f;
     volatile int rc = -EIO;
     if (os_try_begin(&f) == 0) {                                       /* a fault while indexing: the archive is dropped */
-        const ArcSource *s = &v->src;
-        rc = type == ARC_ZIP ? arc_zip_parse(&v->idx, s->data, s->len, &v->info) : arc_tar_parse(&v->idx, s->data, s->len, &v->info);
+        rc = arc_parse_source(&v->src, path, &v->idx, &v->info);
         os_try_end(&f);
     }
     if (rc == 0) rc = arc_idx_finish(&v->idx);
@@ -122,12 +121,15 @@ static int arc_index_file(ArcVfs *v, const char *path, int type)
 /* enters the archive `name` of the folder shown: 1 / 3 (damaged) entered, 0 not an archive, 4 unreadable, 5 too large, 6 a format not supported yet */
 static int arc_open(DirModel *m, const char *name)
 {
-    int type = arc_is_archive(name);
-    if (!type) return arc_unsupported_format(name) ? 6 : 0;
     char *path = mem_alloc(PATH_MAX);
     if (!path || path_join(path, m->path, name, PATH_MAX) < 0) {             /* path-checked */
         mem_free(path);
         return 4;
+    }
+    int type = arc_detect_file(path);                                        /* by contents; the name decides where they say nothing */
+    if (type <= 0 || type == ARC_UNSUPPORTED) {
+        mem_free(path);
+        return type ? 6 : 0;
     }
     arc_free_ctx(m);
     ArcVfs *v = mem_alloc(sizeof *v);

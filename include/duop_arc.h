@@ -9,6 +9,8 @@
 #define ARC_TAR 1
 #define ARC_TGZ 2
 #define ARC_ZIP 3
+#define ARC_GZ 4                     /* a single gzip-compressed file (not a tar): one virtual member (arc_source.c) */
+#define ARC_UNSUPPORTED 99           /* arc_detect_file: a known format that is not implemented yet */
 
 typedef struct ArcEntry {            /* 288 bytes */
     char name[256];
@@ -34,7 +36,7 @@ _Static_assert(sizeof(ArcCtx) == 32 + 3 * PATH_MAX, "ACTX_SIZE of the assembler"
 
 /* parsing (archive_parse.c): untrusted input, every offset checked without overflow */
 int arc_is_archive(const char *name);                          /* by extension: ARC_TAR / ARC_TGZ / ARC_ZIP (also zip-based .docx / .jar / .apk ...), 0 */
-bool arc_unsupported_format(const char *name);                 /* a known archive / compression format that is not implemented yet (.xz .bz2 .7z .rar .zst, a plain .gz) */
+bool arc_unsupported_format(const char *name);                 /* a known archive / compression format that is not implemented yet (.xz .bz2 .7z .rar .zst ...) */
 void arc_parse_tar(ArcCtx *ctx);
 void arc_parse_zip(ArcCtx *ctx);
 void *arc_ungzip(const uint8_t *src, uint64_t src_len, uint64_t *out_len);   /* mem_alloc'd data or NULL */

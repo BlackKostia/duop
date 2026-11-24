@@ -14,7 +14,7 @@ import c_harness as H
 from archive_fixtures import MTIME, Expect
 
 ROOT = H.ROOT
-SRCS_ENGINE = ["src/fs/arc_unpack.c", "src/fs/arc_unpack_item.c", "src/fs/arc_path.c", "src/fs/arc_task.c", "src/fs/arc_source.c",
+SRCS_ENGINE = ["src/fs/arc_unpack.c", "src/fs/arc_unpack_item.c", "src/fs/arc_path.c", "src/fs/arc_task.c", "src/fs/arc_source.c", "src/fs/arc_detect.c",
                "src/fs/arc_extract.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c",
                "src/fs/archive_parse.c", "src/fs/inflate.c", "src/core/hash.c"]
 SRCS_BASE = ["tests/harness/arcunpack_cli.c", "src/fs/task.c", "src/fs/task_conflict.c", "src/fs/file_ops_overwrite.c", "src/fs/file_ops.c",

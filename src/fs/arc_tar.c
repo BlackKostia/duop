@@ -46,7 +46,7 @@ static bool tar_num(const uint8_t *p, int n, uint64_t *out)
     return true;
 }
 
-static bool tar_checksum_ok(const uint8_t *h)
+bool arc_tar_checksum_ok(const uint8_t *h)
 {
     uint64_t want;
     if (!tar_num(h + 148, 8, &want)) return false;
@@ -212,7 +212,7 @@ int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *
         }
         const uint8_t *h = data + off;
         if (bytes_zero(h, 512)) break;                                        /* the end-of-archive block */
-        if (!tar_checksum_ok(h)) {
+        if (!arc_tar_checksum_ok(h)) {
             if (first) return -EINVAL;
             info->damaged = 1;
             break;

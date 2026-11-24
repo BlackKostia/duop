@@ -14,7 +14,8 @@ typedef struct ArcSource {
     uint64_t len;
     void *map;                              /* what to os_munmap, and its length */
     uint64_t map_len;
-    int type;                               /* ARC_TAR / ARC_TGZ / ARC_ZIP */
+    int type;                               /* ARC_TAR / ARC_TGZ / ARC_ZIP / ARC_GZ */
+    int64_t mtime;                          /* ARC_GZ: the time in the gzip header (0 when it has none) */
 } ArcSource;
 
 typedef struct ArcVfs {                     /* DirModel.arc_ctx while virtual_mode == 2 */
@@ -26,7 +27,12 @@ typedef struct ArcVfs {                     /* DirModel.arc_ctx while virtual_mo
     char file[PATH_MAX];                    /* the archive file */
 } ArcVfs;
 
-/* maps the archive (a .tar.gz is gunzipped to an unlinked temp file first): 0, -errno, or -EFBIG past ARC_OPEN_TGZ_MAX. Only regular non-empty files. */
+/* The kind of the archive file at path by its contents, the extension deciding only where they say nothing: ARC_TAR / ARC_TGZ / ARC_ZIP / ARC_GZ
+ * (a gzip that is not a tar), ARC_UNSUPPORTED (xz, bzip2, zstd, 7z, rar ... recognised, not implemented), 0 (not an archive). Never blocks (FIFOs). */
+int arc_detect_file(const char *path);
+/* the index of a source: tar and zip members, or the one member of a ARC_GZ (named after path without .gz) - 0 or the parser's error */
+int arc_parse_source(const ArcSource *s, const char *path, ArcIndex *x, ArcParseInfo *info);
+/* maps the archive (a .tar.gz / .gz is gunzipped to an unlinked temp file first): 0, -errno, or -EFBIG past ARC_OPEN_TGZ_MAX. Only regular non-empty files. */
 int arc_source_open(ArcSource *s, const char *path, int type);
 int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked);   /* the same with another limit for a .tar.gz (the worker's) */
 void arc_source_close(ArcSource *s);

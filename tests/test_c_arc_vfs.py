@@ -11,7 +11,7 @@ AV3 scale: a 12 MiB zip, a tar.gz inflating to 40 MiB, 120000 tar members, 70000
 AV4 damage: a truncated tar enters flagged (r=3); a zip entry with a flipped byte fails its CRC; gzip with a bad trailer, random bytes
     named .zip / .tar, an empty file: not entered (r=4); ".." leaves the archive on its row
 AV7 other names: zip-based files (.docx .jar .apk .whl .epub .xlsx ...) enter as archives (r=1); .xz .bz2 .7z .rar .zst .tar.xz and a plain .gz are
-    known formats that are not supported yet (r=6); a .tar.gz that unpacks past the limit is r=5; a plain file is r=0
+    known formats that are not supported yet (r=6); a plain .gz is a one-member archive (r=1); a .tar.gz that unpacks past the limit is r=5; a plain file is r=0
 AV5 aarch64 (qemu-user) gives the x86_64 output;  AV6 mutation check;  AV7 see above
 """
 
@@ -34,7 +34,7 @@ from test_c_arc_index import normalize
 
 ROOT = H.ROOT
 VFS = ["src/fs/archive_vfs.c", "src/fs/arc_source.c", "src/fs/arc_extract.c"]
-NEW = ["src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
+NEW = ["src/fs/arc_detect.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
 MODS = ["src/fs/dir_model.c", "src/fs/dir_model_filter.c", "src/fs/dir_model_load.c", "src/fs/dir_model_stream.c", "src/fs/dir_model_stat.c",
         "src/fs/dir_model_select.c", "src/fs/dir_sort.c", "src/fs/dir_sort_radix.c", "src/fs/dir_cache.c", "src/fs/dir_search.c",
         "src/fs/dir_search_match.c", "src/fs/inflate.c", "src/fs/file_ops_delete.c", "src/fs/file_ops.c", "src/fs/file_ops_copy.c",
@@ -295,8 +295,9 @@ def test_other_names(exe: Path, work: Path) -> None:
     got = {n: int(out[1 + 2 * i].split()[1][2:]) for i, n in enumerate(names)}
     for n in ("a.docx", "b.jar", "c.apk", "d.whl", "e.epub", "f.xlsx", "g.odt", "h.pptx", "i.cbz", "j.nupkg", "w.tar.gz"):
         assert got[n] == 1, (n, got[n])
-    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4", "plain.gz"):
+    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4"):
         assert got[n] == 6, (n, got[n])
+    assert got["plain.gz"] == 1, got["plain.gz"]                                  # a plain .gz is a one-member archive since v2.9.3
     assert got["notes.txt"] == 0, got["notes.txt"]
     small = run(build(work / "small", cflags=["-DARC_OPEN_TGZ_MAX=1048576ull"]), f"N {d}\nE w.tar.gz\nE a.docx\n")
     assert small[1].startswith("E r=5 ") and small[2].startswith("E r=1 "), (small[1][:40], small[2][:40])

@@ -31,9 +31,10 @@ static const char *archive_of(DirModel *m, FilePane *pane, char *out)
     }
     FileEntry *fe = FilePane_get_selected_entry(pane);
     if (m->virtual_mode != 0 || !fe || (fe->flags & (FE_IS_DIR | FE_IS_PARENT))) return lang->s[LS_arc_not_archive];
-    const char *name = DirModel_entry_name(m, fe);
-    if (!arc_is_archive(name)) return lang->s[LS_arc_not_archive];
-    return path_join(out, m->path, name, PATH_MAX) < 0 ? lang->s[LS_arc_not_archive] : nullptr;
+    if (path_join(out, m->path, DirModel_entry_name(m, fe), PATH_MAX) < 0) return lang->s[LS_arc_not_archive];
+    int type = arc_detect_file(out);                                          /* by contents: a renamed archive and a plain .gz count */
+    if (type == ARC_UNSUPPORTED) return lang->s[LS_arc_format_unsupported];
+    return type > 0 ? nullptr : lang->s[LS_arc_not_archive];
 }
 
 void App_cmd_unpack(App *app)

@@ -313,7 +313,7 @@ def test_aarch64(x86: Path, work: Path, paths: list[Path]) -> None:
 MUTANTS = [
     ("ustar prefix", "if (posix && h[345]) {", "if (false && h[345]) {"),
     ("gnu magic", "h[262] == 0", "true"),
-    ("checksum", "if (!tar_checksum_ok(h)) {", "if (false) {"),
+    ("checksum", "if (!arc_tar_checksum_ok(h)) {", "if (false) {"),
     ("signed checksum", " || (int64_t)want == sum_s", ""),
     ("base256", "if (p[0] & 0x80) {", "if (false) {"),
     ("link size zero", "if (type >= '1' && type <= '6') size = 0;", ""),

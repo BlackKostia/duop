@@ -15,6 +15,8 @@ typedef struct ArcParseInfo {
     uint64_t end;                   /* tar: offset of the end-of-archive block (or the data length) */
 } ArcParseInfo;
 
+/* a 512-byte block is a valid tar header: the checksum (unsigned or signed sum) matches */
+bool arc_tar_checksum_ok(const uint8_t *h);
 /* 0, -EINVAL when data is not this kind of archive (the first header / the end record is invalid), -ENOMEM, -EFBIG (too many members) */
 int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info);
 /* zip: the end record is searched from the back (an exact comment length wins), ZIP64 and a prefix (self-extractor stub, offsets relative

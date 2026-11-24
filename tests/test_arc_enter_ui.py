@@ -2,8 +2,9 @@
 """Enter on archive-like files in a real pane: browse what can be browsed, say why when not - never a silent hex dump.
 
 AE1 a zip-based file (.docx / .jar / .apk) opens as a folder
-AE2 .tar.xz / .7z / .rar / .zst / a plain .gz: a status message ("cannot be browsed yet"), no viewer
+AE2 .tar.xz / .7z / .rar / .zst, and an xz file under another name: a status message ("cannot be browsed yet"), no viewer
 AE3 a .zip / .tar.gz that is damaged: "Not a readable archive", no viewer;  F3 still shows the raw bytes
+AE5 a plain .gz opens as a one-member folder, a zip under another name opens as a folder
 AE4 the same by a mouse double click: an archive opens as a folder (not a hex dump), a folder inside it and ".." work, an unsupported
     format and a damaged archive show their message
 """
@@ -74,8 +75,8 @@ def test_zip_based_opens_as_folder():
 
 
 def test_unsupported_formats_explain():
-    names = ("a.7z", "b.rar", "c.tar.xz", "d.zst", "e.gz")
-    sess = session({n: gzip.compress(b"x" * 500) if n == "e.gz" else b"\x00opaque\xff" * 200 for n in names})
+    names = ("a.7z", "b.rar", "c.tar.xz", "d.zst", "e.dat")
+    sess = session({n: b"\xfd7zXZ\x00" + bytes(300) if n == "e.dat" else b"\x00opaque\xff" * 200 for n in names})
     try:
         for i, name in enumerate(names):
             open_nth(sess, 1 if i == 0 else 1)
@@ -98,6 +99,23 @@ def test_damaged_says_so_and_f3_still_views():
     finally:
         kill(sess)
     print("[PASS] AE3. a damaged archive: 'Not a readable archive' on Enter, the raw bytes on F3")
+
+
+def test_plain_gz_and_renamed_archives_open():
+    z = zip_bytes([Expect("readme.txt", data=b"hi")])
+    sess = session({"notes.txt.gz": gzip.compress(b"hello gzip\n" * 20), "renamed.dat": z, "text.txt": b"just text\n"})
+    try:
+        open_nth(sess, 1)                                            # notes.txt.gz (sorted first): its one member
+        wait_for(sess, "/left/notes.txt.gz ")
+        assert "« .." in sess.vt.full_text() and "notes.txt" in sess.vt.full_text(), sess.vt.full_text()
+        sess.send(b"\x7f", wait=0.3)                                 # .. out of it
+        wait_for(sess, "renamed.dat")
+        sess.send(DOWN, wait=0.1)
+        sess.send(ENTER, wait=0.5)                                   # renamed.dat: a zip under another name
+        wait_for(sess, "readme.txt")
+    finally:
+        kill(sess)
+    print("[PASS] AE5. a plain .gz opens as a one-member folder; a zip under another name opens as a folder")
 
 
 def double_click(sess, row):
@@ -137,6 +155,7 @@ def main():
     test_zip_based_opens_as_folder()
     test_unsupported_formats_explain()
     test_damaged_says_so_and_f3_still_views()
+    test_plain_gz_and_renamed_archives_open()
     test_double_click()
     print("ALL ARCHIVE ENTER UI TESTS PASSED.")
 

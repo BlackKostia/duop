@@ -15,8 +15,8 @@ static bool arc_ends_ci(const char *s, size_t len, const char *sfx, size_t sfx_l
 /* files that are zips under another name (office documents, packages, e-books, ...) */
 static const char *const zip_based[] = {".docx", ".xlsx", ".pptx", ".docm", ".xlsm", ".odt", ".ods", ".odp", ".odg", ".epub", ".jar", ".war", ".ear",
                                         ".apk", ".aab", ".aar", ".whl", ".egg", ".xpi", ".crx", ".nupkg", ".vsix", ".cbz"};
-/* formats that are known but not implemented yet (xz / bzip2 / zstd / 7z / rar ...; a plain .gz: .tar.gz is checked before) */
-static const char *const not_yet[] = {".7z", ".rar", ".xz", ".txz", ".bz2", ".tbz", ".tbz2", ".zst", ".tzst", ".lz4", ".lzma", ".lz", ".cab", ".gz"};
+/* formats that are known but not implemented yet (xz / bzip2 / zstd / 7z / rar ...) */
+static const char *const not_yet[] = {".7z", ".rar", ".xz", ".txz", ".bz2", ".tbz", ".tbz2", ".zst", ".tzst", ".lz4", ".lzma", ".lz", ".cab"};
 
 static bool arc_in_list(const char *name, size_t n, const char *const *list, size_t count)
 {

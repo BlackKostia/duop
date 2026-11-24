@@ -12,6 +12,7 @@ AU7 Cancel (c) in the progress dialog stops a big unpack: "Operation canceled", 
 AU8 the pane of the archive survives an unpack (still lists the archive, ".." works); a file that only has an archive name is reported as unreadable
 """
 
+import gzip
 import os
 import sys
 import tempfile
@@ -255,6 +256,24 @@ def test_not_an_archive():
     print("[PASS] AU9. a random file named .zip: 'Not a readable archive' for unpack and test, nothing written")
 
 
+def test_plain_gz_and_unsupported():
+    c = Case({"a.dat": b"\xfd7zXZ\x00" + bytes(300), "notes.txt.gz": gzip.compress(b"gzip text\n" * 30), "z.dat": zip_bytes(TREE)})
+    try:
+        c.keys(DOWN, wait=0.15)                              # a.dat: xz by its magic
+        c.keys(ALT_F9, wait=0.4)
+        wait_for(c.sess, "cannot be browsed yet")            # a clear message, no dialog
+        c.keys(DOWN, ALT_F9, wait=0.4)                       # notes.txt.gz
+        wait_for(c.sess, "Unpack")
+        c.keys(ENTER, wait=0.3)
+        wait_until(lambda: c.right_files() == {"notes.txt": b"gzip text\n" * 30}, "the one file, no subfolder")
+        c.keys(DOWN, ALT_F9, wait=0.4)                       # z.dat: a zip under another name
+        c.keys(ENTER, wait=0.3)
+        wait_until(lambda: "z.dat/readme.txt" in c.right_files(), "renamed zip unpacked (smart folder named after the file)")
+    finally:
+        c.close()
+    print("[PASS] AU10. Alt+F9: a plain .gz unpacks to its file, a zip under another name unpacks, an xz file says it is not supported yet")
+
+
 def main():
     test_f5_whole_folder()
     test_selection()
@@ -264,6 +283,7 @@ def main():
     test_evil()
     test_cancel()
     test_not_an_archive()
+    test_plain_gz_and_unsupported()
     print("ALL ARCHIVE UNPACK UI TESTS PASSED.")
 
 

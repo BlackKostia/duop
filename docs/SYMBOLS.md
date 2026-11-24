@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 662
+- **Exported `.global` Symbols**: 665
 
 ## Structs (`include/*.inc`)
 
@@ -381,6 +381,8 @@
 
 ### Filesystem & Codecs (`src/fs/`)
 
+- **`src/fs/arc_detect.c`**
+  - `arc_detect_file` — `int arc_detect_file(const char *path)`
 - **`src/fs/arc_extract.c`**
   - `arc_extract_to` — `intptr_t arc_extract_to(const ArcSource *s, const ArcItem *it, int fd, ArcXfer *x)`
 - **`src/fs/arc_index.c`**
@@ -398,7 +400,9 @@
 - **`src/fs/arc_source.c`**
   - `arc_source_open_max` — `int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked)`
   - `arc_source_close` — `void arc_source_close(ArcSource *s)`
+  - `arc_parse_source` — `int arc_parse_source(const ArcSource *s, const char *path, ArcIndex *x, ArcParseInfo *info)`
 - **`src/fs/arc_tar.c`**
+  - `arc_tar_checksum_ok` — `bool arc_tar_checksum_ok(const uint8_t *h)`
   - `arc_tar_parse` — `int arc_tar_parse(ArcIndex *x, const uint8_t *data, uint64_t len, ArcParseInfo *info)`
 - **`src/fs/arc_task.c`**
   - `arc_task_run` — `intptr_t arc_task_run(const TaskJob *job, TaskShared *shm)`

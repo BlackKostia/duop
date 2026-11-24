@@ -77,6 +77,7 @@ C_SRCS := \
 	src/fs/arc_tar.c \
 	src/fs/arc_zip.c \
 	src/fs/arc_source.c \
+	src/fs/arc_detect.c \
 	src/fs/arc_extract.c \
 	src/fs/arc_path.c \
 	src/fs/arc_unpack_item.c \
@@ -381,6 +382,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_arc_tar.py
 	python3 tests/test_c_arc_zip.py
 	python3 tests/test_c_arc_vfs.py
+	python3 tests/test_c_arc_detect.py
 	python3 tests/test_c_arc_unpack.py
 	python3 tests/test_arc_unpack_ui.py
 	python3 tests/test_arc_enter_ui.py
