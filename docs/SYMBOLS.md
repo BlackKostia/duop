@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 665
+- **Exported `.global` Symbols**: 675
 
 ## Structs (`include/*.inc`)
 
@@ -254,6 +254,10 @@
   - `sha256_final_hex` — `void sha256_final_hex(ShaCtx *c, char *out)`
 - **`src/core/hash_file.c`**
   - `hash_file` — `intptr_t hash_file(const char *path, uint32_t *out_crc32, char *out_sha_hex65)`
+- **`src/core/hash_xxh.c`**
+  - `xxh64_init` — `void xxh64_init(Xxh64 *x)`
+  - `xxh64_update` — `void xxh64_update(Xxh64 *x, const uint8_t *buf, size_t len)`
+  - `xxh64_digest` — `uint64_t xxh64_digest(const Xxh64 *x)`
 - **`src/core/mem_prims.c`**
   - `memcpy` — `void *memcpy(void *restrict dst, const void *restrict src, size_t n)`
   - `memmove` — `void *memmove(void *dst, const void *src, size_t n)`
@@ -677,6 +681,17 @@
   - `trash_move_file` — `int trash_move_file(const char *src_path, const char *const *envp, char *out_trash_path, char *out_info_path)`
   - `undo_push` — `void undo_push(int kind, const char *orig_path, const char *cur_path, const char *info_path)`
   - `undo_pop_and_apply` — `int undo_pop_and_apply(void)`
+- **`src/fs/zstd_dec.c`**
+  - `zstd_decode` — `intptr_t zstd_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
+- **`src/fs/zstd_fse.c`**
+  - `zstd_fse_read` — `int zstd_fse_read(FseTable *t, const uint8_t *src, size_t n, uint32_t max_log, uint32_t max_sym, size_t *used)`
+  - `zstd_fse_rle` — `void zstd_fse_rle(FseTable *t, uint8_t sym)`
+  - `zstd_fse_predef` — `int zstd_fse_predef(FseTable *t, int which)`
+- **`src/fs/zstd_huf.c`**
+  - `zstd_huf_table` — `int zstd_huf_table(HufTable *t, const uint8_t *src, size_t n, size_t *used)`
+  - `zstd_huf_decode` — `int zstd_huf_decode(const HufTable *t, uint8_t *dst, size_t dst_len, const uint8_t *src, size_t n, bool four)`
+- **`src/fs/zstd_seq.c`**
+  - `zstd_sequences` — `int zstd_sequences(ZstdCtx *c, const uint8_t *src, size_t n)`
 
 ### UI Widgets & Dialogs (`src/ui/`)
 

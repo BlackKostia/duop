@@ -34,7 +34,7 @@ from test_c_arc_index import normalize
 
 ROOT = H.ROOT
 VFS = ["src/fs/archive_vfs.c", "src/fs/arc_source.c", "src/fs/arc_extract.c"]
-NEW = ["src/fs/arc_detect.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
+NEW = ["src/fs/zstd_dec.c", "src/fs/zstd_fse.c", "src/fs/zstd_huf.c", "src/fs/zstd_seq.c", "src/core/hash_xxh.c", "src/fs/arc_detect.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c", "src/fs/archive_parse.c", "src/core/hash.c"]
 MODS = ["src/fs/dir_model.c", "src/fs/dir_model_filter.c", "src/fs/dir_model_load.c", "src/fs/dir_model_stream.c", "src/fs/dir_model_stat.c",
         "src/fs/dir_model_select.c", "src/fs/dir_sort.c", "src/fs/dir_sort_radix.c", "src/fs/dir_cache.c", "src/fs/dir_search.c",
         "src/fs/dir_search_match.c", "src/fs/inflate.c", "src/fs/file_ops_delete.c", "src/fs/file_ops.c", "src/fs/file_ops_copy.c",
@@ -295,8 +295,9 @@ def test_other_names(exe: Path, work: Path) -> None:
     got = {n: int(out[1 + 2 * i].split()[1][2:]) for i, n in enumerate(names)}
     for n in ("a.docx", "b.jar", "c.apk", "d.whl", "e.epub", "f.xlsx", "g.odt", "h.pptx", "i.cbz", "j.nupkg", "w.tar.gz"):
         assert got[n] == 1, (n, got[n])
-    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4"):
+    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4"):
         assert got[n] == 6, (n, got[n])
+    assert got["o.zst"] == 4 and got["p.tar.zst"] == 4, (got["o.zst"], got["p.tar.zst"])           # zstd is read since v2.10.0: opaque bytes are a damaged .zst
     assert got["plain.gz"] == 1, got["plain.gz"]                                  # a plain .gz is a one-member archive since v2.9.3
     assert got["notes.txt"] == 0, got["notes.txt"]
     small = run(build(work / "small", cflags=["-DARC_OPEN_TGZ_MAX=1048576ull"]), f"N {d}\nE w.tar.gz\nE a.docx\n")

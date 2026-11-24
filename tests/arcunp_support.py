@@ -16,7 +16,7 @@ from archive_fixtures import MTIME, Expect
 ROOT = H.ROOT
 SRCS_ENGINE = ["src/fs/arc_unpack.c", "src/fs/arc_unpack_item.c", "src/fs/arc_path.c", "src/fs/arc_task.c", "src/fs/arc_source.c", "src/fs/arc_detect.c",
                "src/fs/arc_extract.c", "src/fs/arc_index.c", "src/fs/arc_tar.c", "src/fs/arc_zip.c", "src/fs/gzip_dec.c", "src/fs/inflate_stream.c",
-               "src/fs/archive_parse.c", "src/fs/inflate.c", "src/core/hash.c"]
+               "src/fs/archive_parse.c", "src/fs/inflate.c", "src/core/hash.c", "src/fs/zstd_dec.c", "src/fs/zstd_fse.c", "src/fs/zstd_huf.c", "src/fs/zstd_seq.c", "src/core/hash_xxh.c"]
 SRCS_BASE = ["tests/harness/arcunpack_cli.c", "src/fs/task.c", "src/fs/task_conflict.c", "src/fs/file_ops_overwrite.c", "src/fs/file_ops.c",
              "src/fs/file_ops_delete.c", "src/fs/file_ops_copy.c", "src/fs/file_ops_read.c", "src/core/string.c", "src/core/string_path.c", "src/core/utf8.c",
              "src/core/memory.c", "src/core/syscall.c", "src/core/try_rt.c", "src/core/mem_prims.c", "src/core/tmpfile.c", "build/i18n_en.c"]

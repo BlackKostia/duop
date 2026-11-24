@@ -54,6 +54,7 @@ SRCS :=
 C_SRCS := \
 	src/core/utf8.c \
 	src/core/hash.c \
+	src/core/hash_xxh.c \
 	src/core/string.c \
 	src/core/string_path.c \
 	src/core/string_format.c \
@@ -73,6 +74,10 @@ C_SRCS := \
 	src/fs/inflate.c \
 	src/fs/inflate_stream.c \
 	src/fs/gzip_dec.c \
+	src/fs/zstd_fse.c \
+	src/fs/zstd_huf.c \
+	src/fs/zstd_seq.c \
+	src/fs/zstd_dec.c \
 	src/fs/arc_index.c \
 	src/fs/arc_tar.c \
 	src/fs/arc_zip.c \
@@ -378,6 +383,8 @@ test-serial: $(TARGET)
 	python3 tests/test_c_inflate.py
 	python3 tests/test_c_inflate_stream.py
 	python3 tests/test_c_gzip_dec.py
+	python3 tests/test_c_zstd_dec.py
+	python3 tests/test_c_arc_zstd.py
 	python3 tests/test_c_arc_index.py
 	python3 tests/test_c_arc_tar.py
 	python3 tests/test_c_arc_zip.py

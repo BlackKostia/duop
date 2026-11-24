@@ -5,7 +5,7 @@ one-member archive (docs/ARCHIVE_ROADMAP_2026-11-24.md, phase 3).
 DT1 renamed archives: zip / tar / tar.gz under any name, a tar named .zip, a zip named .tar, a tar.gz named .gz are entered as what they are
 DT2 plain .gz: one member named after the file (.gz stripped; "<name>.out" under another name), exact bytes, multi-member gzip, an empty
     payload; the modification time of the gzip header is kept; a bad CRC / truncated stream is not entered (r=4)
-DT3 xz / bzip2 / zstd / 7z / rar by magic are "not supported yet" (r=6) under any name; text that only looks similar is a plain file (r=0)
+DT3 xz / bzip2 / 7z / rar by magic are "not supported yet" (r=6) under any name; text that only looks similar is a plain file (r=0)
 DT4 a FIFO named like an archive never blocks the open; empty and tiny files are not archives
 DT5 unpacking and testing a plain .gz (smart unpack: no subfolder), a renamed zip, a tar.gz named .gz;  DT6 aarch64 equals x86_64
 DT7 mutation check
@@ -131,7 +131,7 @@ def test_unsupported(exe: Path, work: Path) -> None:
     src = d / "payload.txt"
     src.write_bytes(TEXT)
     made = {}
-    for tool, args, ext in (("xz", ["xz", "-c"], "x1.dat"), ("bzip2", ["bzip2", "-c"], "x2.dat"), ("zstd", ["zstd", "-q", "-c"], "x3.dat")):
+    for tool, args, ext in (("xz", ["xz", "-c"], "x1.dat"), ("bzip2", ["bzip2", "-c"], "x2.dat")):
         if shutil.which(tool):
             made[ext] = subprocess.run([*args, str(src)], capture_output=True, check=True).stdout
     if shutil.which("7z"):
@@ -225,15 +225,15 @@ MUTANTS = [
     ("zip empty record", "starts(h, n, pk56, 4)", "false"),
     ("gzip is a tar", "(arc_tar_checksum_ok(pk.blk) ||", "(false ||"),
     ("full block required", "if (pk.n == 512 && (", "if (("),
-    ("zero block of tgz", "(by_ext == ARC_TGZ && all_zero(pk.blk, 512))", "false"),
+    ("zero block of tgz", "(by_ext == tar_type && all_zero(pk.blk, 512))", "false"),
     ("tar by checksum", "if (n >= 512 && h[0] && arc_tar_checksum_ok(h)) return ARC_TAR;", ""),
     ("bzip2 block magic", "!__builtin_memcmp(h + 4, bz, sizeof bz)", "true"),
     ("rar magic", "{6, {'R', 'a', 'r', '!', 0x1A, 0x07}},", ""),
     ("detect nonblocking", "O_RDONLY | O_CLOEXEC | O_NONBLOCK, 0);   /* a FIFO must not block the pane */", "O_RDONLY | O_CLOEXEC, 0);"),
     ("source nonblocking", "O_RDONLY | O_CLOEXEC | O_NONBLOCK, 0);   /* a FIFO named like an archive must not block */", "O_RDONLY | O_CLOEXEC, 0);"),
-    ("gz suffix", "name[n - 3] = 0;", "name[n] = 0;"),
-    ("gz out suffix", 'else (void)str_cat(name, ".out", sizeof name);', ""),
-    ("empty gz", "if (r < 0 || (!res.produced && s->type != ARC_GZ)) {", "if (r < 0 || !res.produced) {"),
+    ("gz suffix", "name[n - k] = 0;", "name[n] = 0;"),
+    ("gz out suffix", 'if (!cut) (void)str_cat(name, ".out", sizeof name);', ""),
+    ("empty gz", "(!res.produced && s->type != ARC_GZ && s->type != ARC_ZST)", "!res.produced"),
 ]
 MUT_SRC = ["src/fs/arc_detect.c", "src/fs/arc_source.c"]
 
