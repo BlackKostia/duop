@@ -328,6 +328,13 @@ en_arc_format_unsupported: .asciz "This archive format cannot be browsed yet (su
 en_err_cmd_long:       .asciz "Command too long: not executed"
 en_cfg_truncated:      .asciz "Config file too large: the rest was ignored"
 en_err_special:        .asciz "Special file (pipe/socket/device) cannot be copied or moved this way"
+en_app_title_pack:      .asciz "Pack"
+en_app_prm_pack:        .asciz "Archive to create (.tar, .tar.gz, .tgz or .zip):"
+en_task_title_pack:     .asciz "Packing"
+en_app_ok_pack:         .asciz "Archive created"
+en_pack_exists:         .asciz "That archive already exists: it is not replaced"
+en_pack_format:         .asciz "Unknown archive type: use a .tar.gz, .tgz, .tar or .zip name"
+en_pack_nothing:        .asciz "Nothing to pack: mark files or put the cursor on one"
 
 .align 8
 .global lang_en_table
@@ -381,6 +388,7 @@ lang_en_table:
     .quad en_app_title_unpack, en_app_prm_unpack, en_task_title_unpack, en_task_title_arctest, en_app_ok_unpack, en_app_ok_arctest, en_arc_issues_pfx, en_arc_issues_sfx, en_arc_bomb, en_arc_not_archive
     .quad en_arc_too_big, en_arc_format_unsupported
     .quad en_err_cmd_long, en_cfg_truncated, en_err_special
+    .quad en_app_title_pack, en_app_prm_pack, en_task_title_pack, en_app_ok_pack, en_pack_exists, en_pack_format, en_pack_nothing
 .if (. - lang_en_table) != LangStrings._size
     .error "lang_en_table size does not match LangStrings._size"
 .endif

@@ -161,6 +161,8 @@ void App_apply_link(App *app, InputDialog *d, int hard)
 void App_view_as_done(App *app, ViewAsDialog *d) { sc_put("call App_view_as_done "); sc_num(app != nullptr && d != nullptr); sc_nl(); }
 void App_cmd_unpack(App *app) { sc_put("call App_cmd_unpack "); sc_num(app != nullptr); sc_nl(); }
 void App_cmd_arctest(App *app) { sc_put("call App_cmd_arctest "); sc_num(app != nullptr); sc_nl(); }
+void App_cmd_pack(App *app) { sc_put("call App_cmd_pack "); sc_num(app != nullptr); sc_nl(); }
+void App_pack_confirm(App *app, const char *dst) { sc_put("call App_pack_confirm "); sc_num(app != nullptr); sc_put(" d=|"); sc_put(dst); sc_put("|"); sc_nl(); }
 void App_unpack_confirm(App *app, const char *dst) { sc_put("call App_unpack_confirm "); sc_num(app != nullptr); sc_put(" d=|"); sc_put(dst); sc_put("|"); sc_nl(); }
 void App_cmd_undo(App *app) { sc_put("call App_cmd_undo "); sc_num(app != nullptr); sc_nl(); }
 void App_cmd_chmod(App *app) { sc_put("call App_cmd_chmod "); sc_num(app != nullptr); sc_nl(); }
@@ -260,7 +262,7 @@ int duop_main(int argc, char **argv, char **envp, const uintptr_t *auxv)
             uint32_t op = (uint32_t)sc_tok_i64(&p);
             int64_t a1 = sc_tok_i64(&p), a2 = sc_tok_i64(&p), a3 = sc_tok_i64(&p);
             u.d.op_tag = op;
-            if (op == OP_UNPACK) (void)str_copy((char *)u.id.buf, "/dest/dir", sizeof u.id.buf);
+            if (op == OP_UNPACK || op == OP_PACK) (void)str_copy((char *)u.id.buf, "/dest/dir", sizeof u.id.buf);
             else if (op == OP_USERMENU) { u.um.cursor = (uint32_t)a1; g_cfg_item_ok = (int)a2; g_pkg_ok = (int)a3; }
             else if (op == OP_BOOKMARKS || op == OP_FRECENCY) { g_bm_sel = a1 ? "/bm/dir" : nullptr; g_nav_rc = a2; }
             else if (op == OP_PALETTE) { g_fuz_sel = (uintptr_t)a1; g_pkg_ok = (int)a2; }

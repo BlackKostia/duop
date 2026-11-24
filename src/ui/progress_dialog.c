@@ -75,6 +75,7 @@ const char *ProgressDialog_title_for(int op)
     if (op == TASK_OP_DELETE) return ls->s[LS_task_title_delete];
     if (op == TASK_OP_UNPACK) return ls->s[LS_task_title_unpack];
     if (op == TASK_OP_ARCTEST) return ls->s[LS_task_title_arctest];
+    if (op == TASK_OP_PACK) return ls->s[LS_task_title_pack];
     return ls->s[LS_task_title_copy];
 }
 

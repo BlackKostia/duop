@@ -155,6 +155,11 @@ def test_archive_keys(exe: Path) -> None:
     assert lines[2] == "call App_cmd_arctest 1" and lines[3].startswith("EK rc=1"), lines[2:4]
     assert "call App_unpack_confirm 1 d=|/dest/dir|" in out, out
     print("[PASS] AE1b. Alt+F9 -> unpack, Alt+Shift+F9 -> test archive, OP_UNPACK -> App_unpack_confirm with the dialog text")
+    key_f5 = 0x100015
+    out = H.run_impl("x86_64", exe, "c", stdin=f"K {key_f5} {alt} 0 0\nD 24 0 0 0\n".encode()).stdout.decode()
+    assert out.splitlines()[0] == "call App_cmd_pack 1" and out.splitlines()[1].startswith("EK rc=1"), out.splitlines()[:2]
+    assert "call App_pack_confirm 1 d=|/dest/dir|" in out, out
+    print("[PASS] AE1c. Alt+F5 -> pack, OP_PACK -> App_pack_confirm with the dialog text")
 
 
 def test_mutations(t: Path, baseline: str) -> None:

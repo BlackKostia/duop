@@ -231,6 +231,7 @@ C_SRCS := \
 	src/app/app_choosedir.c \
 	src/app/app_arc.c \
 	src/app/app_arc_cmds.c \
+	src/app/app_pack_cmds.c \
 	src/app/app_view.c \
 	src/app/app_toggles.c \
 	src/app/app_du.c \
@@ -409,6 +410,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_arc_detect.py
 	python3 tests/test_c_arc_unpack.py
 	python3 tests/test_arc_unpack_ui.py
+	python3 tests/test_arc_pack_ui.py
 	python3 tests/test_arc_enter_ui.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py

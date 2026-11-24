@@ -110,6 +110,7 @@ intptr_t App_close_dialog_ext(App *app, Dialog *dlg, FilePane *pane, DirModel *m
     case OP_FUZZY: app_close_fuzzy_dlg(app, (FuzzyDialog *)dlg, pane); break;
     case OP_VIEWAS: App_view_as_done(app, (ViewAsDialog *)dlg); break;
     case OP_UNPACK: App_unpack_confirm(app, (const char *)((InputDialog *)dlg)->buf); break;
+    case OP_PACK: App_pack_confirm(app, (const char *)((InputDialog *)dlg)->buf); break;
     default: break;
     }
     return 0;
@@ -171,6 +172,10 @@ static int handle_ext_ctrl(App *app, int key)
 static int handle_ext_alt(App *app, int key, int mods)
 {
     int lc = key | 0x20;
+    if (key == KEY_F5) {                                            /* Alt+F5 pack */
+        App_cmd_pack(app);
+        return 1;
+    }
     if (key == KEY_F9) {                                            /* Alt+F9 unpack, Alt+Shift+F9 test */
         if (mods & MOD_SHIFT) App_cmd_arctest(app);
         else App_cmd_unpack(app);

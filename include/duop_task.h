@@ -8,6 +8,7 @@
 #define TASK_OP_DELETE 3
 #define TASK_OP_UNPACK 4         /* archive members (job: src_dir = archive, names = [sub, member keys...]) into dst */
 #define TASK_OP_ARCTEST 5        /* every member decoded and verified, nothing written */
+#define TASK_OP_PACK 6           /* files into an archive (job: src_dir = base folder, names = the entries, dst = the archive, join_dst = ARC_PACK_* format) */
 #define TASK_PHASE_SCAN 1
 #define TASK_PHASE_RUN 2
 #define TASK_PHASE_DONE 3

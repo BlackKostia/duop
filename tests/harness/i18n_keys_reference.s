@@ -295,6 +295,13 @@ i18n_keys:
     LK err_cmd_long, LangStrings.err_cmd_long
     LK cfg_truncated, LangStrings.cfg_truncated
     LK err_special, LangStrings.err_special
+    LK app_title_pack, LangStrings.app_title_pack
+    LK app_prm_pack, LangStrings.app_prm_pack
+    LK task_title_pack, LangStrings.task_title_pack
+    LK app_ok_pack, LangStrings.app_ok_pack
+    LK pack_exists, LangStrings.pack_exists
+    LK pack_format, LangStrings.pack_format
+    LK pack_nothing, LangStrings.pack_nothing
     .short 0xFFFF
 .if lk_slots * 8 != LangStrings._size
     .error "i18n_keys: every LangStrings slot needs exactly one key"

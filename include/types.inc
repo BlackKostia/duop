@@ -219,5 +219,12 @@ LangStrings.arc_format_unsupported:.space 8
 LangStrings.err_cmd_long:       .space 8
 LangStrings.cfg_truncated:      .space 8
 LangStrings.err_special:        .space 8
+LangStrings.app_title_pack:     .space 8
+LangStrings.app_prm_pack:       .space 8
+LangStrings.task_title_pack:    .space 8
+LangStrings.app_ok_pack:        .space 8
+LangStrings.pack_exists:        .space 8
+LangStrings.pack_format:        .space 8
+LangStrings.pack_nothing:       .space 8
 LangStrings._size:
 .section .text

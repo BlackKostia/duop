@@ -382,6 +382,7 @@ CLASS_END App
 .equ OP_FUZZY,     21
 .equ OP_VIEWAS,    22
 .equ OP_UNPACK,    23
+.equ OP_PACK,      24
 
 # --- HeaderBar Action IDs ---
 .equ HDR_BTN_THEME,   1

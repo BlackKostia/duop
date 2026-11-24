@@ -75,6 +75,8 @@ void App_apply_link(App *app, InputDialog *dlg, int is_hard);
 typedef struct Dialog Dialog;
 typedef struct DirModel DirModel;
 void App_cmd_unpack(App *app);                                /* Alt+F9, F5 in an archive pane: ask where to, then unpack (app_arc_cmds.c) */
+void App_cmd_pack(App *app);                                  /* Alt+F5: ask for the archive to create from the marked entries (app_pack_cmds.c) */
+void App_pack_confirm(App *app, const char *path);           /* the dialog confirmed: start the TaskWorker pack */
 void App_cmd_arctest(App *app);                               /* Alt+Shift+F9: decode and verify every member, write nothing */
 void App_unpack_confirm(App *app, const char *dst);           /* the Unpack dialog was confirmed */
 void App_task_launch(App *app, const struct TaskJob *job);           /* fs_task_start + the UI state of a running task (app_task.c) */

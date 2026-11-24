@@ -148,6 +148,14 @@ void App_task_launch(App *app, const TaskJob *job)
 static void task_finish_archive(App *app, uint32_t op, int64_t result)
 {
     const LangStrings *lang = i18n_get();
+    if (op == TASK_OP_PACK && result == -EEXIST) {
+        App_set_status(app, lang->s[LS_pack_exists], MSG_WARN);
+        return;
+    }
+    if (op == TASK_OP_PACK && result != 0) {
+        task_status_errno(app, result);
+        return;
+    }
     if (result == -EFBIG) {
         App_set_status(app, lang->s[LS_arc_bomb], MSG_ERR);
     } else if (result == -EINVAL || result == -EOPNOTSUPP) {
@@ -161,7 +169,7 @@ static void task_finish_archive(App *app, uint32_t op, int64_t result)
         (void)str_copy(msg + n, lang->s[LS_arc_issues_sfx], sizeof msg - n);
         App_set_status(app, msg, MSG_WARN);
     } else {
-        App_set_status(app, op == TASK_OP_ARCTEST ? lang->s[LS_app_ok_arctest] : lang->s[LS_app_ok_unpack], MSG_OK);
+        App_set_status(app, op == TASK_OP_ARCTEST ? lang->s[LS_app_ok_arctest] : op == TASK_OP_PACK ? lang->s[LS_app_ok_pack] : lang->s[LS_app_ok_unpack], MSG_OK);
     }
 }
 
@@ -176,7 +184,7 @@ static void task_finalize(App *app, int64_t result)
     }
     App_reload_panes(app, nullptr);
     uint32_t op = app_snap(app)->op;
-    if (op == TASK_OP_UNPACK || op == TASK_OP_ARCTEST) {
+    if (op == TASK_OP_UNPACK || op == TASK_OP_ARCTEST || op == TASK_OP_PACK) {
         task_finish_archive(app, op, result);
     } else if (result != 0) {
         task_status_errno(app, result);
