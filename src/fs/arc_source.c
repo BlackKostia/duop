@@ -56,7 +56,13 @@ static int map_decoded(ArcSource *s, DecodeFn decode, const uint8_t *gz, uint64_
     return 0;
 }
 
-int arc_source_open(ArcSource *s, const char *path, int type) { return arc_source_open_max(s, path, type, ARC_OPEN_TGZ_MAX); }
+/* the open is synchronous (the pane waits), so a slower decoder may unpack less: bzip2 a quarter of the limit, xz half, the rest all of it */
+static uint64_t open_cap(int type)
+{
+    return type == ARC_TBZ || type == ARC_BZ ? ARC_OPEN_TGZ_MAX >> 2 : type == ARC_TXZ || type == ARC_XZ ? ARC_OPEN_TGZ_MAX >> 1 : ARC_OPEN_TGZ_MAX;
+}
+
+int arc_source_open(ArcSource *s, const char *path, int type) { return arc_source_open_max(s, path, type, open_cap(type)); }
 
 int arc_source_open_max(ArcSource *s, const char *path, int type, uint64_t max_unpacked)
 {

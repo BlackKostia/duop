@@ -5,9 +5,11 @@ BA1 a plain .bz2 is a one-member archive, a .tar.bz2 / .tbz2 / .tbz (or a tar.bz
     names, exact bytes, several streams and blocks, an empty payload; a bad CRC / cut / opaque file is not entered (r=4)
 BA2 zip members compressed with method 12 (bzip2) list, extract to their exact bytes and fail on a wrong CRC
 BA3 unpacking and testing: .bz2, .tar.bz2, a renamed one, a zip with a bzip2 member; damaged input leaves nothing
+BA6 the synchronous open caps what a codec may unpack (a quarter for bzip2, half for xz)
 BA4 aarch64 (qemu-user) gives the x86_64 results;  BA5 mutation check
 """
 
+import gzip
 import os
 import random
 import re
@@ -217,6 +219,21 @@ def test_mutants(work: Path) -> None:
     print(f"[PASS] BA5. {len(MUTANTS)}/{len(MUTANTS)} mutants of the bzip2 archive glue are noticed")
 
 
+def test_open_caps(work: Path) -> None:
+    """The open is synchronous, so the slower codecs get a smaller share of ARC_OPEN_TGZ_MAX: xz half, bzip2 a quarter."""
+    d = work / "caps"
+    d.mkdir()
+    from xz_support import xz
+    tar = tar_bytes([Expect("blob.bin", data=random.Random(4).randbytes(700000))])             # 700 KB unpacked
+    for name, data in (("c.tar.gz", gzip.compress(tar, 1, mtime=0)), ("c.tar.xz", xz(tar, "crc32", preset=1)), ("c.tar.bz2", bz(tar, 1)), ("s.bz2", bz(tar, 1)),
+                       ("small.tar.bz2", bz(tar_bytes([Expect("a", data=b"x" * 100000)]), 1))):
+        (d / name).write_bytes(data)
+    exe = V.run(V.build(work / "caps_b", cflags=["-DARC_OPEN_TGZ_MAX=1048576ull"]), f"N {d}\nE c.tar.gz\nU\nE c.tar.xz\nU\nE c.tar.bz2\nU\nE s.bz2\nU\nE small.tar.bz2\n")
+    got = [int(exe[i].split()[1][2:]) for i in (1, 3, 5, 7, 9)]
+    assert got == [1, 5, 5, 5, 1], got                    # of 1 MiB: gzip all, xz 512 KiB, bzip2 256 KiB; the tar is 700 KB
+    print("[PASS] BA6. the synchronous open caps what a codec may unpack: bzip2 a quarter of ARC_OPEN_TGZ_MAX, xz half, the rest all of it")
+
+
 def main() -> None:
     with H.workdir() as t:
         w = Path(t).resolve()
@@ -225,6 +242,7 @@ def main() -> None:
         test_zip12(exe, w)
         test_unpack(w)
         test_aarch64(exe, w)
+        test_open_caps(w)
         test_mutants(w)
     print("ALL C ARC BZIP2 TESTS PASSED.")
 
