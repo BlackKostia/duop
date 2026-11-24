@@ -79,6 +79,8 @@ C_SRCS := \
 	src/fs/lzma_dec.c \
 	src/fs/lzma2_dec.c \
 	src/fs/xz_dec.c \
+	src/fs/deflate.c \
+	src/fs/deflate_huff.c \
 	src/fs/zstd_fse.c \
 	src/fs/zstd_huf.c \
 	src/fs/zstd_seq.c \
@@ -391,6 +393,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_zstd_dec.py
 	python3 tests/test_c_xz_dec.py
 	python3 tests/test_c_bzip2_dec.py
+	python3 tests/test_c_deflate.py
 	python3 tests/test_c_arc_zstd.py
 	python3 tests/test_c_arc_xz.py
 	python3 tests/test_c_arc_bzip2.py

@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 684
+- **Exported `.global` Symbols**: 692
 
 ## Structs (`include/*.inc`)
 
@@ -435,6 +435,16 @@
   - `arc_extract_entry` — `intptr_t arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path)`
 - **`src/fs/bzip2_dec.c`**
   - `bzip2_decode` — `intptr_t bzip2_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
+- **`src/fs/deflate.c`**
+  - `deflate_new` — `Deflate *deflate_new(int level, const CodecSink *sink)`
+  - `deflate_free` — `void deflate_free(Deflate *d)`
+  - `deflate_write` — `int deflate_write(Deflate *d, const uint8_t *buf, size_t len)`
+  - `deflate_finish` — `int deflate_finish(Deflate *d)`
+- **`src/fs/deflate_huff.c`**
+  - `deflate_tables_init` — `void deflate_tables_init(Deflate *d)`
+  - `deflate_flush_bits` — `int deflate_flush_bits(Deflate *d)`
+  - `deflate_emit_stored` — `int deflate_emit_stored(Deflate *d, const uint8_t *buf, size_t len, bool last)`
+  - `deflate_emit_block` — `int deflate_emit_block(Deflate *d, const uint8_t *stored, size_t stored_len, bool last)`
 - **`src/fs/dir_cache.c`**
   - `dircache_store` — `int dircache_store(DirModel *m)`
   - `dircache_fetch` — `int dircache_fetch(DirModel *m, const FileStat *st)`
