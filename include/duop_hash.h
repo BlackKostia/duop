@@ -1,4 +1,4 @@
-/* include/duop_hash.h - CRC32 and SHA-256 (src/core/hash.c), XXH64 (src/core/hash_xxh.c) and whole-file hashing (src/core/hash_file.c). */
+/* include/duop_hash.h - CRC32 and SHA-256 (src/core/hash.c), XXH64 (src/core/hash_xxh.c), CRC-64 (src/core/hash_crc64.c) and whole-file hashing (src/core/hash_file.c). */
 #pragma once
 #include "duop_abi.h"
 
@@ -14,6 +14,9 @@ uint32_t crc32_update(uint32_t crc, const uint8_t *buf, size_t len);   /* raw ru
 void sha256_init(ShaCtx *ctx);
 void sha256_update(ShaCtx *ctx, const uint8_t *buf, size_t len);
 void sha256_final_hex(ShaCtx *ctx, char *out_hex65);                   /* 64 lower-case hex digits + NUL */
+
+/* CRC-64/XZ: the check type 4 of .xz; raw running value, seed ~0, invert at the end (as crc32_update) */
+uint64_t crc64_update(uint64_t crc, const uint8_t *buf, size_t len);
 
 /* XXH64 (seed 0), streaming: the content checksum of Zstandard frames (its low 32 bits) */
 typedef struct Xxh64 {

@@ -257,9 +257,9 @@ def test_not_an_archive():
 
 
 def test_plain_gz_and_unsupported():
-    c = Case({"a.dat": b"\xfd7zXZ\x00" + bytes(300), "notes.txt.gz": gzip.compress(b"gzip text\n" * 30), "z.dat": zip_bytes(TREE)})
+    c = Case({"a.dat": b"BZh91AY&SY" + bytes(300), "notes.txt.gz": gzip.compress(b"gzip text\n" * 30), "z.dat": zip_bytes(TREE)})
     try:
-        c.keys(DOWN, wait=0.15)                              # a.dat: xz by its magic
+        c.keys(DOWN, wait=0.15)                              # a.dat: bzip2 by its magic
         c.keys(ALT_F9, wait=0.4)
         wait_for(c.sess, "cannot be browsed yet")            # a clear message, no dialog
         c.keys(DOWN, ALT_F9, wait=0.4)                       # notes.txt.gz
@@ -271,7 +271,7 @@ def test_plain_gz_and_unsupported():
         wait_until(lambda: "z.dat/readme.txt" in c.right_files(), "renamed zip unpacked (smart folder named after the file)")
     finally:
         c.close()
-    print("[PASS] AU10. Alt+F9: a plain .gz unpacks to its file, a zip under another name unpacks, an xz file says it is not supported yet")
+    print("[PASS] AU10. Alt+F9: a plain .gz unpacks to its file, a zip under another name unpacks, a bzip2 file says it is not supported yet")
 
 
 def main():

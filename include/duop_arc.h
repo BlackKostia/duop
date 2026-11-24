@@ -12,6 +12,8 @@
 #define ARC_GZ 4                     /* a single gzip-compressed file (not a tar): one virtual member (arc_source.c) */
 #define ARC_TZST 5                   /* a tar compressed with Zstandard (.tar.zst) */
 #define ARC_ZST 6                    /* a single Zstandard-compressed file (not a tar): one virtual member */
+#define ARC_TXZ 7                    /* a tar compressed with xz (.tar.xz) */
+#define ARC_XZ 8                     /* a single xz-compressed file (not a tar): one virtual member */
 #define ARC_UNSUPPORTED 99           /* arc_detect_file: a known format that is not implemented yet */
 
 typedef struct ArcEntry {            /* 288 bytes */

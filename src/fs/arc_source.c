@@ -1,12 +1,13 @@
 /* src/fs/arc_source.c - opening an archive for the virtual folder: a read-only mapping of the file (tar, zip), or of the unpacked data
- * (.tar.gz / .tar.zst and a plain .gz / .zst: decompressed once into an unlinked temporary file, so a crash can never leave it behind).
- * A plain .gz / .zst is an archive of one member, the file it unpacks to. Freestanding C23. */
+ * (.tar.gz / .tar.zst / .tar.xz and a plain .gz / .zst / .xz: decompressed once into an unlinked temporary file, so a crash can never leave it behind).
+ * A plain .gz / .zst / .xz is an archive of one member, the file it unpacks to. Freestanding C23. */
 #include "duop_arcvfs.h"
 #include "duop_inflate.h"
 #include "duop_oop.h"
 #include "duop_pal.h"
 #include "duop_string.h"
 #include "duop_sys.h"
+#include "duop_xz.h"
 #include "duop_zstd.h"
 
 static intptr_t temp_write(void *ctx, const uint8_t *buf, size_t len)
@@ -22,6 +23,7 @@ static DecodeFn decoder_of(int type)
 {
     if (type == ARC_TGZ || type == ARC_GZ) return gzip_decode;
     if (type == ARC_TZST || type == ARC_ZST) return zstd_decode;
+    if (type == ARC_TXZ || type == ARC_XZ) return xz_decode;
     return nullptr;
 }
 
@@ -35,7 +37,7 @@ static int map_decoded(ArcSource *s, DecodeFn decode, const uint8_t *gz, uint64_
     CodecSink sink = {temp_write, &ifd};
     CodecResult res;
     intptr_t r = decode(gz, gz_len, max, &sink, &res);
-    if (r < 0 || (!res.produced && s->type != ARC_GZ && s->type != ARC_ZST)) {   /* an empty tar is damaged, an empty file is a file */
+    if (r < 0 || (!res.produced && s->type != ARC_GZ && s->type != ARC_ZST && s->type != ARC_XZ)) {   /* an empty tar is damaged, an empty file is a file */
         (void)os_close(ifd);
         return r < 0 ? (int)r : -EINVAL;
     }
@@ -96,7 +98,7 @@ void arc_source_close(ArcSource *s)
 /* the one member of a plain .gz / .zst: the file name without the suffix (or with ".out" when it has another name), the unpacked bytes in place */
 static int single_member(ArcIndex *x, const ArcSource *s, const char *path)
 {
-    static const char *const sfx[] = {".gz", ".zst", ".tgz", ".tzst"};
+    static const char *const sfx[] = {".gz", ".zst", ".xz", ".tgz", ".tzst", ".txz"};
     char name[300];
     const char *base = path_basename(path);
     size_t n = str_len(base);
@@ -122,6 +124,6 @@ static int single_member(ArcIndex *x, const ArcSource *s, const char *path)
 int arc_parse_source(const ArcSource *s, const char *path, ArcIndex *x, ArcParseInfo *info)
 {
     if (s->type == ARC_ZIP) return arc_zip_parse(x, s->data, s->len, info);
-    if (s->type == ARC_GZ || s->type == ARC_ZST) return single_member(x, s, path);
+    if (s->type == ARC_GZ || s->type == ARC_ZST || s->type == ARC_XZ) return single_member(x, s, path);
     return arc_tar_parse(x, s->data, s->len, info);
 }

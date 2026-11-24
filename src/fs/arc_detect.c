@@ -1,8 +1,8 @@
 /* src/fs/arc_detect.c - what an archive file is, decided by its contents (freestanding C23).
  *
- * A file is read for at most one KiB (and, for gzip and zstd, enough input to see the first 512 bytes of what it unpacks to): zip, gzip
- * and zstd by their magic, a tar by a valid header checksum, a gzip / zstd file as a tar.gz / tar.zst when it unpacks to a tar and as a
- * one-member archive otherwise. Formats that are known but not implemented yet (xz, bzip2, 7z, rar, ...) are recognised by magic too,
+ * A file is read for at most one KiB (and, for gzip, zstd and xz, enough input to see the first 512 bytes of what it unpacks to): zip, gzip,
+ * zstd and xz by their magic, a tar by a valid header checksum, a gzip / zstd file as a tar.gz / tar.zst when it unpacks to a tar and as a
+ * one-member archive otherwise. Formats that are known but not implemented yet (bzip2, 7z, rar, ...) are recognised by magic too,
  * so that Enter says why instead of opening a hex dump. Where the contents say nothing the extension decides (self-extracting zips, v7 tars,
  * unreadable files), so a file that was an archive by name stays one. Only regular files are opened, without blocking.
  * Text that merely looks like a magic is not mistaken for one: bzip2 needs its block signature, zip its record signature. */
@@ -11,10 +11,12 @@
 #include "duop_pal.h"
 #include "duop_string.h"
 #include "duop_sys.h"
+#include "duop_xz.h"
 #include "duop_zstd.h"
 
 #define HEAD_MIN 1024u                      /* enough for every magic below and for a tar header */
 #define GZ_PEEK (96u << 10)                 /* gzip input handed to the decoder: one 64 KiB window of output needs no more */
+#define XZ_PEEK (96u << 10)                 /* xz: the headers and the first LZMA2 chunk (at most 64 KiB packed) */
 #define ZST_PEEK (144u << 10)               /* zstd: the frame header and the whole first block (at most 128 KiB, stored when it does not compress) */
 
 typedef struct {
@@ -37,7 +39,6 @@ static bool starts(const uint8_t *h, size_t n, const uint8_t *m, size_t k) { ret
 static bool known_unsupported(const uint8_t *h, size_t n)
 {
     static const struct { uint8_t len; uint8_t m[8]; } tab[] = {
-        {6, {0xFD, '7', 'z', 'X', 'Z', 0}},             /* xz */
         {6, {'7', 'z', 0xBC, 0xAF, 0x27, 0x1C}},        /* 7z */
         {6, {'R', 'a', 'r', '!', 0x1A, 0x07}},          /* rar */
         {4, {0x04, 0x22, 0x4D, 0x18}},                  /* lz4 */
@@ -84,6 +85,8 @@ static int classify(int fd, const uint8_t *h, size_t n, int by_ext)
     static const uint8_t pk34[] = {'P', 'K', 3, 4}, pk56[] = {'P', 'K', 5, 6};
     if (starts(h, n, pk34, 4) || starts(h, n, pk56, 4)) return ARC_ZIP;
     if (n >= 3 && h[0] == 0x1F && h[1] == 0x8B && h[2] == 8) return classify_packed(fd, h, n, GZ_PEEK, gzip_decode, ARC_TGZ, ARC_GZ, by_ext);
+    static const uint8_t xz_magic[] = {0xFD, '7', 'z', 'X', 'Z', 0};
+    if (starts(h, n, xz_magic, 6)) return classify_packed(fd, h, n, XZ_PEEK, xz_decode, ARC_TXZ, ARC_XZ, by_ext);
     if (n >= 4 && ((h[0] == 0x28 && h[1] == 0xB5 && h[2] == 0x2F && h[3] == 0xFD) || ((h[0] & 0xF0) == 0x50 && h[1] == 0x2A && h[2] == 0x4D && h[3] == 0x18)))
         return classify_packed(fd, h, n, ZST_PEEK, zstd_decode, ARC_TZST, ARC_ZST, by_ext);       /* a frame, or a skippable frame first */
     if (known_unsupported(h, n)) return ARC_UNSUPPORTED;
@@ -103,7 +106,9 @@ static int ext_type(const char *path)
     int t = arc_is_archive(path);
     if (t) return t;
     if (ends_ci(path, ".tar.zst") || ends_ci(path, ".tzst")) return ARC_TZST;
-    return ends_ci(path, ".zst") ? ARC_ZST : 0;
+    if (ends_ci(path, ".tar.xz") || ends_ci(path, ".txz")) return ARC_TXZ;
+    if (ends_ci(path, ".zst")) return ARC_ZST;
+    return ends_ci(path, ".xz") ? ARC_XZ : 0;
 }
 
 int arc_detect_file(const char *path)

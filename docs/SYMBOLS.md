@@ -7,7 +7,7 @@
 - **Structs (`.struct`)**: 16
 - **OOP Classes (`CLASS_BEGIN`)**: 25
 - **Vtable Contracts (`VTBL_*`)**: 3
-- **Exported `.global` Symbols**: 675
+- **Exported `.global` Symbols**: 683
 
 ## Structs (`include/*.inc`)
 
@@ -252,6 +252,8 @@
   - `sha256_init` — `void sha256_init(ShaCtx *c)`
   - `sha256_update` — `void sha256_update(ShaCtx *c, const uint8_t *p, size_t n)`
   - `sha256_final_hex` — `void sha256_final_hex(ShaCtx *c, char *out)`
+- **`src/core/hash_crc64.c`**
+  - `crc64_update` — `uint64_t crc64_update(uint64_t crc, const uint8_t *buf, size_t len)`
 - **`src/core/hash_file.c`**
   - `hash_file` — `intptr_t hash_file(const char *path, uint32_t *out_crc32, char *out_sha_hex65)`
 - **`src/core/hash_xxh.c`**
@@ -578,6 +580,14 @@
   - `inflate_zlib` — `int64_t inflate_zlib(const void *src, uint64_t src_len, void *dst, uint64_t dst_cap)`
 - **`src/fs/inflate_stream.c`**
   - `inflate_stream` — `intptr_t inflate_stream(const void *src, uint64_t src_len, uint32_t flags, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
+- **`src/fs/lzma2_dec.c`**
+  - `xz_out_write` — `int xz_out_write(XzOut *o, const uint8_t *p, size_t n)`
+  - `lzma2_decode` — `int lzma2_decode(Lzma *z, XzOut *o, uint32_t dict_size, const uint8_t *src, size_t n, size_t *used)`
+- **`src/fs/lzma_dec.c`**
+  - `lzma_set_props` — `bool lzma_set_props(Lzma *z, uint32_t props)`
+  - `lzma_reset_state` — `void lzma_reset_state(Lzma *z)`
+  - `lzma_rc_init` — `int lzma_rc_init(Lzma *z, const uint8_t *in, size_t n)`
+  - `lzma_run` — `int lzma_run(Lzma *z, size_t limit)`
 - **`src/fs/nav_persist.c`**
   - `nav_bookmarks_remove` — `void nav_bookmarks_remove(int idx)`
 - **`src/fs/nav_state.c`**
@@ -681,6 +691,8 @@
   - `trash_move_file` — `int trash_move_file(const char *src_path, const char *const *envp, char *out_trash_path, char *out_info_path)`
   - `undo_push` — `void undo_push(int kind, const char *orig_path, const char *cur_path, const char *info_path)`
   - `undo_pop_and_apply` — `int undo_pop_and_apply(void)`
+- **`src/fs/xz_dec.c`**
+  - `xz_decode` — `intptr_t xz_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/zstd_dec.c`**
   - `zstd_decode` — `intptr_t zstd_decode(const void *src, uint64_t src_len, uint64_t max_out, const CodecSink *sink, CodecResult *res)`
 - **`src/fs/zstd_fse.c`**
