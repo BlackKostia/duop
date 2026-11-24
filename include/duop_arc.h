@@ -33,7 +33,8 @@ typedef struct ArcCtx {
 _Static_assert(sizeof(ArcCtx) == 32 + 3 * PATH_MAX, "ACTX_SIZE of the assembler");
 
 /* parsing (archive_parse.c): untrusted input, every offset checked without overflow */
-int arc_is_archive(const char *name);                          /* by extension: ARC_TAR / ARC_TGZ / ARC_ZIP, 0 */
+int arc_is_archive(const char *name);                          /* by extension: ARC_TAR / ARC_TGZ / ARC_ZIP (also zip-based .docx / .jar / .apk ...), 0 */
+bool arc_unsupported_format(const char *name);                 /* a known archive / compression format that is not implemented yet (.xz .bz2 .7z .rar .zst, a plain .gz) */
 void arc_parse_tar(ArcCtx *ctx);
 void arc_parse_zip(ArcCtx *ctx);
 void *arc_ungzip(const uint8_t *src, uint64_t src_len, uint64_t *out_len);   /* mem_alloc'd data or NULL */
@@ -43,7 +44,8 @@ void *arc_ungzip(const uint8_t *src, uint64_t src_len, uint64_t *out_len);   /* 
 void arc_populate(DirModel *m);                                /* the entries of ctx->sub as a listing */
 void arc_free_ctx(DirModel *m);
 int arc_nav_up_model(DirModel *m);                             /* -1: not in an archive; else the cursor */
-int arc_enter_model(DirModel *m, const FileEntry *ent);        /* 0 no, 1 entered, 2 "..", 3 entered but the archive is damaged / incomplete */
+int arc_enter_model(DirModel *m, const FileEntry *ent);        /* 0 not an archive, 1 entered, 2 "..", 3 entered but damaged / incomplete, 4 an archive that cannot be read,
+                                                                  5 too large to open here, 6 a format that is not supported yet */
 intptr_t arc_extract_entry(DirModel *m, const FileEntry *ent, char *out_tmp_path);   /* the member into a temp file: 0, or -errno (EACCES encrypted, EOPNOTSUPP method, EBADMSG checksum) */
 
 int ds_append_entry(DirModel *m, const char *rel_name, const FileStat *st);   /* dir_search.c */

@@ -90,7 +90,7 @@ void ScreenBuffer_draw_text_pad(ScreenBuffer *s, int x, int y, const char *utf8,
  * src/tui/i18n_en.lang; i18n_keys.c: key lookup; i18n_env.c: registry; i18n_pack.c: *.lang packs) ----
  * One table = one pointer per slot; slot 0 is the language code, 1 its name. The order and count are the assembler's
  * `LangStrings` (include/types.inc), proven equal by tests/test_abi_layouts.py. */
-#define LANG_SLOTS 278
+#define LANG_SLOTS 280
 #define I18N_MAX 16                /* interface languages: built-in English + *.lang packs */
 #define I18N_FILE_MAX 65536        /* bytes read from one *.lang file */
 #define I18N_ARENA 524288          /* static storage for loaded packs (tables + text) */

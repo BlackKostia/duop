@@ -25,6 +25,12 @@ int arc_handle_enter(App *app)
     FileEntry *e = FilePane_get_selected_entry(ap);
     int r = arc_enter_model((DirModel *)(uintptr_t)ap->model, e);
     if (r == 0) return 0;
+    if (r >= 4) {                                                    /* an archive that cannot be entered: say why instead of opening it as a file */
+        const LangStrings *lang = i18n_get();
+        App_set_status(app, r == 5 ? lang->s[LS_arc_too_big] : r == 6 ? lang->s[LS_arc_format_unsupported] : lang->s[LS_arc_not_archive], MSG_WARN);
+        app->need_redraw = 1;
+        return 1;
+    }
     if (r == 2) {
         (void)arc_nav_up(ap);
     } else {

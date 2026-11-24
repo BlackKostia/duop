@@ -290,6 +290,8 @@ i18n_keys:
     LK arc_issues_sfx, LangStrings.arc_issues_sfx
     LK arc_bomb, LangStrings.arc_bomb
     LK arc_not_archive, LangStrings.arc_not_archive
+    LK arc_too_big, LangStrings.arc_too_big
+    LK arc_format_unsupported, LangStrings.arc_format_unsupported
     LK err_cmd_long, LangStrings.err_cmd_long
     LK cfg_truncated, LangStrings.cfg_truncated
     LK err_special, LangStrings.err_special

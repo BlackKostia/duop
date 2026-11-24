@@ -159,11 +159,25 @@ def test_mutations(t: Path, baseline: str) -> None:
     print(f"[PASS] AL3. {len(muts)}/{len(muts)} mutants killed across A1.1 app modules")
 
 
+def test_enter_failures(exe: Path) -> None:
+    """arc_enter_model results 4 / 5 / 6 (a recognised archive that cannot be read, one that is too large, a format not supported yet):
+    the Enter is handled - no viewer, the cursor stays - and the status says why (C side only)."""
+    out = H.run_impl("x86_64", exe, "c", stdin=b"A 1 4 0\nA 1 5 0\nA 1 6 0\nA 1 0 0\n").stdout.decode()
+    ln = out.splitlines()
+    msgs = [l for l in ln if l.startswith("call App_set_status")]
+    assert len(msgs) == 3, out
+    assert "Not a readable archive" in msgs[0] and "too large" in msgs[1] and "cannot be browsed yet" in msgs[2], msgs
+    rcs = [l for l in ln if l.startswith("AE rc=")]
+    assert rcs[:3] == ["AE rc=1 cur=5 rd=1"] * 3 and rcs[3].startswith("AE rc=0 cur=5"), rcs
+    print("[PASS] AL1b. Enter on an unreadable / too large / unsupported archive is handled with a status message, not a viewer")
+
+
 def main() -> None:
     with H.workdir() as wd:
         t = Path(wd)
         exe = build("x86_64", t / "x86")
         out = test_differential(exe, t)
+        test_enter_failures(exe)
         if H.available("aarch64"):
             exe_arm = build("aarch64", t / "arm64")
             r = H.run_impl("aarch64", exe_arm, "c", stdin=build_script(t / "arm_cd.txt").encode())

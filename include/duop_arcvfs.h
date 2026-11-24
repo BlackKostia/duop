@@ -5,7 +5,9 @@
 #include "duop_arc.h"
 #include "duop_arcparse.h"
 
+#ifndef ARC_OPEN_TGZ_MAX
 #define ARC_OPEN_TGZ_MAX (512ull << 20)     /* a .tar.gz is unpacked to a temporary file to be indexed: at most this much (the open is synchronous) */
+#endif
 
 typedef struct ArcSource {
     const uint8_t *data;                    /* the tar / zip bytes (for .tar.gz: the unpacked tar in an unlinked temporary file) */

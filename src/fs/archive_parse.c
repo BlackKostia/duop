@@ -12,13 +12,31 @@ static bool arc_ends_ci(const char *s, size_t len, const char *sfx, size_t sfx_l
     return len >= sfx_len && !str_casecmp(s + len - sfx_len, sfx);
 }
 
+/* files that are zips under another name (office documents, packages, e-books, ...) */
+static const char *const zip_based[] = {".docx", ".xlsx", ".pptx", ".docm", ".xlsm", ".odt", ".ods", ".odp", ".odg", ".epub", ".jar", ".war", ".ear",
+                                        ".apk", ".aab", ".aar", ".whl", ".egg", ".xpi", ".crx", ".nupkg", ".vsix", ".cbz"};
+/* formats that are known but not implemented yet (xz / bzip2 / zstd / 7z / rar ...; a plain .gz: .tar.gz is checked before) */
+static const char *const not_yet[] = {".7z", ".rar", ".xz", ".txz", ".bz2", ".tbz", ".tbz2", ".zst", ".tzst", ".lz4", ".lzma", ".lz", ".cab", ".gz"};
+
+static bool arc_in_list(const char *name, size_t n, const char *const *list, size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+        if (arc_ends_ci(name, n, list[i], str_len(list[i]))) return true;
+    return false;
+}
+
 int arc_is_archive(const char *name)
 {
     size_t n = str_len(name);
     if (arc_ends_ci(name, n, ".tar.gz", 7) || arc_ends_ci(name, n, ".tgz", 4)) return ARC_TGZ;
     if (arc_ends_ci(name, n, ".tar", 4)) return ARC_TAR;
-    if (arc_ends_ci(name, n, ".zip", 4)) return ARC_ZIP;
+    if (arc_ends_ci(name, n, ".zip", 4) || arc_in_list(name, n, zip_based, sizeof zip_based / sizeof zip_based[0])) return ARC_ZIP;
     return 0;
+}
+
+bool arc_unsupported_format(const char *name)
+{
+    return !arc_is_archive(name) && arc_in_list(name, str_len(name), not_yet, sizeof not_yet / sizeof not_yet[0]);
 }
 
 /* tar numbers: octal digits, blanks skipped, ended by NUL or anything else */

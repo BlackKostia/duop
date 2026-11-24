@@ -119,24 +119,27 @@ static int arc_index_file(ArcVfs *v, const char *path, int type)
     return rc;
 }
 
+/* enters the archive `name` of the folder shown: 1 / 3 (damaged) entered, 0 not an archive, 4 unreadable, 5 too large, 6 a format not supported yet */
 static int arc_open(DirModel *m, const char *name)
 {
     int type = arc_is_archive(name);
+    if (!type) return arc_unsupported_format(name) ? 6 : 0;
     char *path = mem_alloc(PATH_MAX);
-    if (!type || !path || path_join(path, m->path, name, PATH_MAX) < 0) {   /* path-checked */
+    if (!path || path_join(path, m->path, name, PATH_MAX) < 0) {             /* path-checked */
         mem_free(path);
-        return 0;
+        return 4;
     }
     arc_free_ctx(m);
     ArcVfs *v = mem_alloc(sizeof *v);
-    if (!v) { mem_free(path); return 0; }
+    if (!v) { mem_free(path); return 4; }
     mem_zero(v, sizeof *v);
-    if (arc_index_file(v, path, type) != 0) {
+    int rc = arc_index_file(v, path, type);
+    if (rc != 0) {
         arc_idx_free(&v->idx);
         arc_source_close(&v->src);
         mem_free(v);
         mem_free(path);
-        return 0;
+        return rc == -EFBIG ? 5 : 4;
     }
     (void)str_copy(v->orig, m->path, PATH_MAX);
     (void)str_copy(v->file, path, PATH_MAX);

@@ -122,7 +122,7 @@ PATH_TEST_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("include/duop_arcparse.h", ("tests/test_c_arc_tar.py", "tests/test_c_arc_zip.py")),
     ("include/duop_arcidx.h", ("tests/test_c_arc_index.py",)),
     ("src/fs/inflate*", ("tests/test_c_inflate.py", "tests/test_archive_vfs.py", "tests/test_pkg_manager.py")),
-    ("src/app/app_arc*", ("tests/test_c_app_leaf1.py", "tests/test_archive_vfs.py", "tests/test_arc_readonly.py")),
+    ("src/app/app_arc*", ("tests/test_c_app_leaf1.py", "tests/test_archive_vfs.py", "tests/test_arc_readonly.py", "tests/test_arc_enter_ui.py")),
     ("src/fs/git_status*", ("tests/test_c_git_status.py", "tests/test_git_status.py", "tests/test_git_trust.py")),
 ("src/fs/git_*", ("tests/test_git_status.py", "tests/test_git_trust.py")),
     ("src/ui/git_render*", ("tests/test_c_git_du_render.py", "tests/test_git_status.py")),

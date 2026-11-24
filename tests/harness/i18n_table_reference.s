@@ -323,6 +323,8 @@ en_arc_issues_pfx: .asciz "Finished, but "
 en_arc_issues_sfx: .asciz " member(s) could not be used (unsafe, encrypted, unsupported or damaged)"
 en_arc_bomb: .asciz "Refused: the archive would expand more than 1000 times (decompression bomb?)"
 en_arc_not_archive: .asciz "Not a readable archive"
+en_arc_too_big: .asciz "Archive is too large to browse here (a .tar.gz may unpack to 512 MiB at most): unpack it with Alt+F9"
+en_arc_format_unsupported: .asciz "This archive format cannot be browsed yet (supported: .tar, .tar.gz, .zip and zip-based files); F3 shows the raw file"
 en_err_cmd_long:       .asciz "Command too long: not executed"
 en_cfg_truncated:      .asciz "Config file too large: the rest was ignored"
 en_err_special:        .asciz "Special file (pipe/socket/device) cannot be copied or moved this way"
@@ -377,6 +379,7 @@ lang_en_table:
     .quad en_pkg_installed, en_pkg_removed, en_pkg_verified, en_pkg_err
     .quad en_pkg_tab_inst, en_pkg_tab_avail, en_arc_truncated, en_arc_readonly, en_arc_member_unsupported, en_arc_member_bad
     .quad en_app_title_unpack, en_app_prm_unpack, en_task_title_unpack, en_task_title_arctest, en_app_ok_unpack, en_app_ok_arctest, en_arc_issues_pfx, en_arc_issues_sfx, en_arc_bomb, en_arc_not_archive
+    .quad en_arc_too_big, en_arc_format_unsupported
     .quad en_err_cmd_long, en_cfg_truncated, en_err_special
 .if (. - lang_en_table) != LangStrings._size
     .error "lang_en_table size does not match LangStrings._size"

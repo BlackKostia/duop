@@ -214,6 +214,8 @@ LangStrings.arc_issues_pfx:     .space 8
 LangStrings.arc_issues_sfx:     .space 8
 LangStrings.arc_bomb:           .space 8
 LangStrings.arc_not_archive:    .space 8
+LangStrings.arc_too_big:        .space 8
+LangStrings.arc_format_unsupported:.space 8
 LangStrings.err_cmd_long:       .space 8
 LangStrings.cfg_truncated:      .space 8
 LangStrings.err_special:        .space 8

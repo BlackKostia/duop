@@ -383,6 +383,7 @@ test-serial: $(TARGET)
 	python3 tests/test_c_arc_vfs.py
 	python3 tests/test_c_arc_unpack.py
 	python3 tests/test_arc_unpack_ui.py
+	python3 tests/test_arc_enter_ui.py
 	python3 tests/test_c_string.py
 	python3 tests/test_c_syscall.py
 	python3 tests/test_c_fsmeta.py

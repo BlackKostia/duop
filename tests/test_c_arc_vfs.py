@@ -9,11 +9,14 @@ AV2 bzip2 / lzma zip members list but do not extract (-EOPNOTSUPP); an encrypted
 AV3 scale: a 12 MiB zip, a tar.gz inflating to 40 MiB, 120000 tar members, 70000 zip members, an 80 MiB deflated entry (all above the
     old 4 MiB / 1024 / 8 MiB / 64 MiB limits): entered, listed, extracted
 AV4 damage: a truncated tar enters flagged (r=3); a zip entry with a flipped byte fails its CRC; gzip with a bad trailer, random bytes
-    named .zip / .tar, an empty file: not entered (r=0); ".." leaves the archive on its row
-AV5 aarch64 (qemu-user) gives the x86_64 output;  AV6 mutation check
+    named .zip / .tar, an empty file: not entered (r=4); ".." leaves the archive on its row
+AV7 other names: zip-based files (.docx .jar .apk .whl .epub .xlsx ...) enter as archives (r=1); .xz .bz2 .7z .rar .zst .tar.xz and a plain .gz are
+    known formats that are not supported yet (r=6); a .tar.gz that unpacks past the limit is r=5; a plain file is r=0
+AV5 aarch64 (qemu-user) gives the x86_64 output;  AV6 mutation check;  AV7 see above
 """
 
 import gzip
+import os
 import io
 import re
 import random
@@ -41,7 +44,7 @@ CORE = ["src/core/string.c", "src/core/utf8.c", "src/core/memory.c", "src/core/s
 EOPNOTSUPP = -95
 
 
-def build(work: Path, arch: str = "x86_64", vfs: list[str] | None = None) -> Path:
+def build(work: Path, arch: str = "x86_64", vfs: list[str] | None = None, cflags: list[str] | None = None) -> Path:
     work.mkdir(parents=True, exist_ok=True)
     inc = ["-I", str(ROOT / f"include/os/linux/{arch}"), "-I", str(ROOT / "include")]
     uring = work / "pal_uring.o"
@@ -50,7 +53,7 @@ def build(work: Path, arch: str = "x86_64", vfs: list[str] | None = None) -> Pat
     stub.write_text('#include "duop_task.h"\n#include "duop_tui.h"\nconst LangStrings *i18n_get(void) { return &lang_en_table; }\n'
                     'int g_task_parent_pid; TaskShared *g_task_shm;\n')
     srcs = ["tests/harness/arcvfs_cli.c", str(stub), *(vfs or VFS), *NEW, *MODS, *[c for c in CORE if c not in MODS]]
-    return H.build(arch, work, list(dict.fromkeys(srcs)), [uring], cflags=["-I", str(ROOT / "tests/harness"), "-I", str(ROOT / "build")])
+    return H.build(arch, work, list(dict.fromkeys(srcs)), [uring], cflags=["-I", str(ROOT / "tests/harness"), "-I", str(ROOT / "build"), *(cflags or [])])
 
 
 def run(exe: Path, script: str, arch: str = "x86_64", timeout: int = 300) -> list[str]:
@@ -271,9 +274,33 @@ def test_damage(exe: Path, work: Path) -> None:
     assert o[6].startswith("E r=1 "), o[6][:80]
     assert o[7] == "X r=-74", f"a flipped byte must fail the CRC-32: {o[7]}"
     assert o[8].startswith("X r=0 len=5000 ") and o[9].startswith("X r=0 len=1 "), o[8:10]
-    assert all(l.startswith("E r=0 ") and " vm=0 " in l for l in o[11:16]), o[11:16]
+    assert all(l.startswith("E r=4 ") and " vm=0 " in l for l in o[11:16]), o[11:16]          # recognised, unreadable
     assert o[16].startswith("E r=1 ") and o[17].startswith("U r=") and " vm=0 " in o[17] and o[18].startswith("U r=-1"), o[16:19]
     print("[PASS] AV4. truncated tar enters flagged (r=3); flipped zip byte fails its CRC; bad gzip / random .zip .tar / empty file are not entered; '..' leaves the archive")
+
+
+def test_other_names(exe: Path, work: Path) -> None:
+    d = work / "names"
+    d.mkdir()
+    z = zip_bytes([Expect("word/document.xml", data=b"<w/>"), Expect("[Content_Types].xml", data=b"<t/>")])
+    for n in ("a.docx", "b.jar", "c.apk", "d.whl", "e.epub", "f.xlsx", "g.odt", "h.pptx", "i.cbz", "j.nupkg"):
+        (d / n).write_bytes(z)
+    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4"):
+        (d / n).write_bytes(b"opaque " * 100)
+    (d / "plain.gz").write_bytes(gzip.compress(b"just text\n" * 50))
+    (d / "notes.txt").write_bytes(b"not an archive\n")
+    (d / "w.tar.gz").write_bytes(gzip.compress(tar_bytes([Expect("x.bin", data=bytes(3 * 1024 * 1024))]), 1, mtime=0))
+    names = sorted(os.listdir(d))
+    out = run(exe, f"N {d}\n" + "".join(f"E {n}\nU\n" for n in names))
+    got = {n: int(out[1 + 2 * i].split()[1][2:]) for i, n in enumerate(names)}
+    for n in ("a.docx", "b.jar", "c.apk", "d.whl", "e.epub", "f.xlsx", "g.odt", "h.pptx", "i.cbz", "j.nupkg", "w.tar.gz"):
+        assert got[n] == 1, (n, got[n])
+    for n in ("k.tar.xz", "l.tar.bz2", "m.7z", "n.rar", "o.zst", "p.tar.zst", "q.xz", "r.bz2", "s.txz", "t.tbz2", "u.lz4", "plain.gz"):
+        assert got[n] == 6, (n, got[n])
+    assert got["notes.txt"] == 0, got["notes.txt"]
+    small = run(build(work / "small", cflags=["-DARC_OPEN_TGZ_MAX=1048576ull"]), f"N {d}\nE w.tar.gz\nE a.docx\n")
+    assert small[1].startswith("E r=5 ") and small[2].startswith("E r=1 "), (small[1][:40], small[2][:40])
+    print("[PASS] AV7. zip-based files enter as archives; known unsupported formats are r=6; a too large .tar.gz is r=5; a plain file is r=0")
 
 
 def test_aarch64(x86: Path, work: Path) -> None:
@@ -356,6 +383,7 @@ def main() -> None:
         test_special(exe, w)
         test_scale(exe, w)
         test_damage(exe, w)
+        test_other_names(exe, w)
         test_aarch64(exe, w)
         test_mutants(w)
     print("ALL C ARC VFS TESTS PASSED.")

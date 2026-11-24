@@ -66,7 +66,7 @@ def both(exe: Path, *args: str) -> str:
 def test_table(exe: Path) -> None:
     out = both(exe, "table")
     lines = out.splitlines()
-    assert len(lines) == len(KEYS) == 278, len(lines)
+    assert len(lines) == len(KEYS) == 280, len(lines)
     assert any(VERSION in ln for ln in lines), "{version} reaches the table"
     assert any("\\x0a" in ln for ln in lines) and any("\\xe2" in ln for ln in lines), "multi-line and UTF-8 slots are covered"
     print(f"[PASS] T1. all {len(lines)} slots of the generated English table are byte-identical to the asm table")
